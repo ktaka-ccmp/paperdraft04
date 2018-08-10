@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.7.7)  10 AUG 2018 16:09
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.7.7)  10 AUG 2018 16:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -62,10 +62,10 @@ Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
 (/usr/local/texlive/2017/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
 File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 )
-Package graphics Info: Driver file: dvipdfmx.def on input line 99.
+Package graphics Info: Driver file: pdftex.def on input line 99.
 
-(/usr/local/texlive/2017/texmf-dist/tex/latex/graphics-def/dvipdfmx.def
-File: dvipdfmx.def 2017/06/24 v5.0g Graphics/color driver for dvipdfmx
+(/usr/local/texlive/2017/texmf-dist/tex/latex/graphics-def/pdftex.def
+File: pdftex.def 2017/06/24 v1.0g Graphics/color driver for pdftex
 ))
 \Gin@req@height=\dimen108
 \Gin@req@width=\dimen109
@@ -76,8 +76,9 @@ Package: xcolor 2016/05/11 v2.12 LaTeX color extensions (UK)
 (/usr/local/texlive/2017/texmf-dist/tex/latex/graphics-cfg/color.cfg
 File: color.cfg 2016/01/02 v1.6 sample color configuration
 )
-Package xcolor Info: Driver file: dvipdfmx.def on input line 225.
+Package xcolor Info: Driver file: pdftex.def on input line 225.
 Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1348.
+Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1352.
 Package xcolor Info: Model `RGB' extended on input line 1364.
 Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1366.
 Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1367.
@@ -379,6 +380,25 @@ LaTeX Font Info:    Redeclaring math delimiter \lVert on input line 535.
 LaTeX Font Info:    Redeclaring math delimiter \rVert on input line 536.
 LaTeX Info: Redefining \not on input line 2100.
 )
+(/usr/local/texlive/2017/texmf-dist/tex/latex/csquotes/csquotes.sty
+Package: csquotes 2017/03/11 v5.2b context-sensitive quotations (JAW)
+\csq@reset=\count118
+\csq@gtype=\count119
+\csq@glevel=\count120
+\csq@qlevel=\count121
+\csq@maxlvl=\count122
+\csq@tshold=\count123
+\csq@ltx@everypar=\toks23
+
+(/usr/local/texlive/2017/texmf-dist/tex/latex/csquotes/csquotes.def
+File: csquotes.def 2017/03/11 v5.2b csquotes generic definitions (JAW)
+)
+Package csquotes Info: Trying to load configuration file 'csquotes.cfg'...
+Package csquotes Info: ... configuration file loaded successfully.
+
+(/usr/local/texlive/2017/texmf-dist/tex/latex/csquotes/csquotes.cfg
+File: csquotes.cfg 
+))
 
 Class ieice Warning: a space should be added between 1st and 2nd name: "".
 
@@ -390,143 +410,210 @@ Class ieice Warning: Check the "affiliate label" label, it does not correspond
 to 
   any labels in \authorentry command.
 
-LaTeX Font Info:    Try loading font information for T1+ntxtlf on input line 47
+LaTeX Font Info:    Try loading font information for T1+ntxtlf on input line 49
 .
 (/usr/local/texlive/2017/texmf-dist/tex/latex/newtx/t1ntxtlf.fd
 File: t1ntxtlf.fd 2015/01/17 v1.0 font definition file for T1/ntx/tlf
 )
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 10.0pt on input line 47.
-
-No file paper.aux.
+(Font)              scaled to size 10.0pt on input line 49.
+Package csquotes Info: Checking for multilingual support...
+Package csquotes Info: ... none found.
+ (./paper.aux)
 \openout1 = `paper.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/ntxmi/m/it on input line 47.
-LaTeX Font Info:    Try loading font information for OML+ntxmi on input line 47
+LaTeX Font Info:    Checking defaults for OML/ntxmi/m/it on input line 49.
+LaTeX Font Info:    Try loading font information for OML+ntxmi on input line 49
 .
+
 (/usr/local/texlive/2017/texmf-dist/tex/latex/newtx/omlntxmi.fd
 File: omlntxmi.fd 2015/08/25 Fontinst v1.933 font definitions for OML/ntxmi.
 )
-LaTeX Font Info:    ... okay on input line 47.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 47.
-LaTeX Font Info:    ... okay on input line 47.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 47.
-LaTeX Font Info:    ... okay on input line 47.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 47.
-LaTeX Font Info:    ... okay on input line 47.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 47.
-LaTeX Font Info:    ... okay on input line 47.
-LaTeX Font Info:    Checking defaults for U/ntxexa/m/n on input line 47.
-LaTeX Font Info:    Try loading font information for U+ntxexa on input line 47.
+LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 49.
+LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 49.
+LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 49.
+LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 49.
+LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    Checking defaults for U/ntxexa/m/n on input line 49.
+LaTeX Font Info:    Try loading font information for U+ntxexa on input line 49.
 
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/newtx/untxexa.fd
 File: untxexa.fd 2012/04/16 Fontinst v1.933 font definitions for U/ntxexa.
 )
-LaTeX Font Info:    ... okay on input line 47.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 47.
-LaTeX Font Info:    Try loading font information for TS1+cmr on input line 47.
+LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 49.
+LaTeX Font Info:    Try loading font information for TS1+cmr on input line 49.
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 47.
-LaTeX Font Info:    Checking defaults for LMS/ntxsy/m/n on input line 47.
-LaTeX Font Info:    Try loading font information for LMS+ntxsy on input line 47
+LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    Checking defaults for LMS/ntxsy/m/n on input line 49.
+LaTeX Font Info:    Try loading font information for LMS+ntxsy on input line 49
 .
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/newtx/lmsntxsy.fd
 File: lmsntxsy.fd 2016/07/02 Fontinst v1.933 font definitions for LMS/ntxsy.
 )
-LaTeX Font Info:    ... okay on input line 47.
-LaTeX Font Info:    Checking defaults for LMX/ntxexx/m/n on input line 47.
+LaTeX Font Info:    ... okay on input line 49.
+LaTeX Font Info:    Checking defaults for LMX/ntxexx/m/n on input line 49.
 LaTeX Font Info:    Try loading font information for LMX+ntxexx on input line 4
-7.
+9.
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/newtx/lmxntxexx.fd
 File: lmxntxexx.fd 2016/07/03 Fontinst v1.933 font definitions for LMX/ntxexx.
 )
-LaTeX Font Info:    ... okay on input line 47.
-\c@mv@tabular=\count118
-\c@mv@boldtabular=\count119
+LaTeX Font Info:    ... okay on input line 49.
+
+(/usr/local/texlive/2017/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count124
+\scratchdimen=\dimen120
+\scratchbox=\box28
+\nofMPsegments=\count125
+\nofMParguments=\count126
+\everyMPshowfont=\toks24
+\MPscratchCnt=\count127
+\MPscratchDim=\dimen121
+\MPnumerator=\count128
+\makeMPintoPDFobject=\count129
+\everyMPtoPDFconversion=\toks25
+) (/usr/local/texlive/2017/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
+Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
+
+(/usr/local/texlive/2017/texmf-dist/tex/generic/oberdiek/infwarerr.sty
+Package: infwarerr 2016/05/16 v1.4 Providing info/warning/error messages (HO)
+)
+(/usr/local/texlive/2017/texmf-dist/tex/latex/oberdiek/grfext.sty
+Package: grfext 2016/05/16 v1.2 Manage graphics extensions (HO)
+
+(/usr/local/texlive/2017/texmf-dist/tex/generic/oberdiek/kvdefinekeys.sty
+Package: kvdefinekeys 2016/05/16 v1.4 Define keys (HO)
+
+(/usr/local/texlive/2017/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
+Package: ltxcmds 2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
+)))
+(/usr/local/texlive/2017/texmf-dist/tex/latex/oberdiek/kvoptions.sty
+Package: kvoptions 2016/05/16 v3.12 Key value format for package options (HO)
+
+(/usr/local/texlive/2017/texmf-dist/tex/generic/oberdiek/kvsetkeys.sty
+Package: kvsetkeys 2016/05/16 v1.17 Key value parser (HO)
+
+(/usr/local/texlive/2017/texmf-dist/tex/generic/oberdiek/etexcmds.sty
+Package: etexcmds 2016/05/16 v1.6 Avoid name clashes with e-TeX commands (HO)
+Package etexcmds Info: Could not find \expanded.
+(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
+(etexcmds)             that some package has redefined \expanded.
+(etexcmds)             In the latter case, load this package earlier.
+)))
+(/usr/local/texlive/2017/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
+Package: pdftexcmds 2017/03/19 v0.25 Utility functions of pdfTeX for LuaTeX (HO
+)
+
+(/usr/local/texlive/2017/texmf-dist/tex/generic/oberdiek/ifpdf.sty
+Package: ifpdf 2017/03/15 v3.2 Provides the ifpdf switch
+)
+Package pdftexcmds Info: LuaTeX not detected.
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+)
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+38.
+Package grfext Info: Graphics extension search list:
+(grfext)             [.pdf,.png,.jpg,.mps,.jpeg,.jbig2,.jb2,.PDF,.PNG,.JPG,.JPE
+G,.JBIG2,.JB2,.eps]
+(grfext)             \AppendGraphicsExtensions on input line 456.
+
+(/usr/local/texlive/2017/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+))
+\c@mv@tabular=\count130
+\c@mv@boldtabular=\count131
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 17.28pt on input line 48.
+(Font)              scaled to size 17.28pt on input line 50.
 LaTeX Font Info:    Font shape `T1/ntxtlf/bx/n' in size <17.28> not available
-(Font)              Font shape `T1/ntxtlf/b/n' tried instead on input line 48.
+(Font)              Font shape `T1/ntxtlf/b/n' tried instead on input line 50.
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
-(Font)              scaled to size 17.28pt on input line 48.
-LaTeX Font Info:    Try loading font information for OT1+ntxtlf on input line 4
-8.
+(Font)              scaled to size 17.28pt on input line 50.
+LaTeX Font Info:    Try loading font information for OT1+ntxtlf on input line 5
+0.
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/newtx/ot1ntxtlf.fd
 File: ot1ntxtlf.fd 2015/01/17 v1.0 font definition file for OT1/ntx/tlf
 )
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 10.0pt on input line 48.
+(Font)              scaled to size 10.0pt on input line 50.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 7.3pt on input line 48.
+(Font)              scaled to size 7.3pt on input line 50.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 5.5pt on input line 48.
-LaTeX Font Info:    Try loading font information for U+ntxmia on input line 48.
+(Font)              scaled to size 5.5pt on input line 50.
+LaTeX Font Info:    Try loading font information for U+ntxmia on input line 50.
 
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/newtx/untxmia.fd
 File: untxmia.fd 2016/01/31 Fontinst v1.933 font definitions for U/ntxmia.
 )
-LaTeX Font Info:    Try loading font information for U+ntxsym on input line 48.
+LaTeX Font Info:    Try loading font information for U+ntxsym on input line 50.
 
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/newtx/untxsym.fd
 File: untxsym.fd 2015/03/20 Fontinst v1.933 font definitions for U/ntxsym.
 )
-LaTeX Font Info:    Try loading font information for U+ntxsyc on input line 48.
+LaTeX Font Info:    Try loading font information for U+ntxsyc on input line 50.
 
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/newtx/untxsyc.fd
 File: untxsyc.fd 2012/04/12 Fontinst v1.933 font definitions for U/ntxsyc.
 )
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 12.0pt on input line 48.
-LaTeX Font Info:    Try loading font information for T1+qhv on input line 48.
+(Font)              scaled to size 12.0pt on input line 50.
+LaTeX Font Info:    Try loading font information for T1+qhv on input line 50.
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/tex-gyre/t1qhv.fd
 File: t1qhv.fd 2009/09/25 v1.2 font definition file for T1/qhv
 )
 LaTeX Font Info:    Font shape `T1/qhv/m/n' will be
-(Font)              scaled to size 10.79993pt on input line 48.
+(Font)              scaled to size 10.79993pt on input line 50.
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 9.0pt on input line 48.
+(Font)              scaled to size 9.0pt on input line 50.
 LaTeX Font Info:    Font shape `T1/qhv/m/n' will be
-(Font)              scaled to size 8.09995pt on input line 48.
+(Font)              scaled to size 8.09995pt on input line 50.
 
 
 LaTeX Font Warning: Font shape `T1/qhv/m/sl' in size <9> not available
-(Font)              Font shape `T1/qhv/m/it' tried instead on input line 48.
+(Font)              Font shape `T1/qhv/m/it' tried instead on input line 50.
 
 LaTeX Font Info:    Font shape `T1/qhv/m/it' will be
-(Font)              scaled to size 8.09995pt on input line 48.
+(Font)              scaled to size 8.09995pt on input line 50.
 LaTeX Font Info:    Font shape `T1/ntxtlf/bx/n' in size <10> not available
-(Font)              Font shape `T1/ntxtlf/b/n' tried instead on input line 48.
+(Font)              Font shape `T1/ntxtlf/b/n' tried instead on input line 50.
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
-(Font)              scaled to size 10.0pt on input line 48.
+(Font)              scaled to size 10.0pt on input line 50.
 LaTeX Font Info:    Font shape `T1/ntxtlf/bx/it' in size <10> not available
-(Font)              Font shape `T1/ntxtlf/b/it' tried instead on input line 48.
+(Font)              Font shape `T1/ntxtlf/b/it' tried instead on input line 50.
 
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/it' will be
-(Font)              scaled to size 10.0pt on input line 48.
+(Font)              scaled to size 10.0pt on input line 50.
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 7.0pt on input line 48.
+(Font)              scaled to size 7.0pt on input line 50.
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 8.0pt on input line 48.
+(Font)              scaled to size 8.0pt on input line 50.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 9.0pt on input line 48.
+(Font)              scaled to size 9.0pt on input line 50.
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 7.3pt on input line 48.
-LaTeX Font Info:    Calculating math sizes for size <7.3> on input line 48.
+(Font)              scaled to size 7.3pt on input line 50.
+LaTeX Font Info:    Calculating math sizes for size <7.3> on input line 50.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 5.32896pt on input line 48.
+(Font)              scaled to size 5.32896pt on input line 50.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 4.01501pt on input line 48.
+(Font)              scaled to size 4.01501pt on input line 50.
 (./summary.tex
 LaTeX Font Info:    Font shape `T1/ntxtlf/bx/n' in size <8> not available
 (Font)              Font shape `T1/ntxtlf/b/n' tried instead on input line 1.
@@ -534,69 +621,244 @@ LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 (Font)              scaled to size 8.0pt on input line 1.
 )
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/it' will be
-(Font)              scaled to size 8.0pt on input line 52.
+(Font)              scaled to size 8.0pt on input line 54.
 LaTeX Font Info:    Font shape `T1/ntxtlf/bx/it' in size <8> not available
-(Font)              Font shape `T1/ntxtlf/b/it' tried instead on input line 52.
+(Font)              Font shape `T1/ntxtlf/b/it' tried instead on input line 54.
 
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/it' will be
-(Font)              scaled to size 8.0pt on input line 52.
- (./body.tex)
-LaTeX Font Info:    Try loading font information for TS1+ntxtlf on input line 6
+(Font)              scaled to size 8.0pt on input line 54.
+ (./body.tex
+
+LaTeX Warning: Citation `eisenbud2016maglev' on page 1 undefined on input line 
 7.
 
+
+LaTeX Warning: Citation `patel2013ananta' on page 1 undefined on input line 7.
+
+
+LaTeX Warning: Citation `menage2007adding' on page 1 undefined on input line 13
+.
+
+
+LaTeX Warning: Citation `K8s2017' on page 1 undefined on input line 22.
+
+
+LaTeX Warning: Citation `Zhang2000' on page 1 undefined on input line 25.
+
+
+LaTeX Warning: Citation `menage2007adding' on page 1 undefined on input line 25
+.
+
+
+LaTeX Warning: Citation `al2008scalable' on page 1 undefined on input line 26.
+
+
+LaTeX Warning: Citation `bertin2017xdp' on page 1 undefined on input line 28.
+
+
+LaTeX Warning: Citation `K8sFederation2017' on page 1 undefined on input line 4
+7.
+
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/it' will be
+(Font)              scaled to size 9.0pt on input line 49.
+LaTeX Font Info:    Try loading font information for TS1+ntxtlf on input line 5
+7.
 (/usr/local/texlive/2017/texmf-dist/tex/latex/newtx/ts1ntxtlf.fd
 File: ts1ntxtlf.fd 2015/01/18 v1.0 fd file for TS1/ntxtlf
 )
 LaTeX Font Info:    Font shape `TS1/ntxtlf/m/n' will be
-(Font)              scaled to size 10.0pt on input line 67.
+(Font)              scaled to size 10.0pt on input line 57.
  [1
-Non-PDF special ignored!
 Non-PDF special ignored!{/usr/local/texlive/2017/texmf-var/fonts/map/pdftex/upd
 map/pdftex.map}
-Non-PDF special ignored!
-Non-PDF special ignored!
-Non-PDF special ignored!
-Non-PDF special ignored!
-Non-PDF special ignored!
 
 
-Non-PDF special ignored!
+]
+
+LaTeX Warning: Citation `Pleshakov2016' on page 2 undefined on input line 60.
 
 
-Non-PDF special ignored!
-Non-PDF special ignored!
-Non-PDF special ignored!
-Non-PDF special ignored!
-Non-PDF special ignored!
-Non-PDF special ignored!
+LaTeX Warning: Citation `NginxInc2016' on page 2 undefined on input line 60.
 
 
-Non-PDF special ignored!
-Non-PDF special ignored!] (./paper.aux)
+LaTeX Warning: Citation `K8sIngress2017' on page 2 undefined on input line 60.
 
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
- ) 
+LaTeX Warning: Citation `Prashanth2016' on page 2 undefined on input line 66.
+
+
+LaTeX Warning: Citation `Zhang2000' on page 2 undefined on input line 66.
+
+
+LaTeX Warning: Citation `ACassen2016' on page 2 undefined on input line 67.
+
+
+LaTeX Warning: Citation `DockerCoreEngineering2016' on page 2 undefined on inpu
+t line 75.
+
+
+LaTeX Warning: Citation `DockerInc2017' on page 2 undefined on input line 75.
+
+
+LaTeX Warning: Citation `Sibiryov2015' on page 2 undefined on input line 81.
+
+
+LaTeX Warning: Citation `Aaltodoc:http://urn.fi/URN:NBN:fi:aalto-201611025433' 
+on page 2 undefined on input line 81.
+
+
+LaTeX Warning: Citation `CoreOSEtcd' on page 2 undefined on input line 84.
+
+
+LaTeX Warning: Citation `HashiCorpConsul' on page 2 undefined on input line 84.
+
+
+
+LaTeX Warning: Citation `eisenbud2016maglev' on page 2 undefined on input line 
+91.
+
+
+LaTeX Warning: Citation `Voellm2013' on page 2 undefined on input line 91.
+
+
+LaTeX Warning: Citation `patel2013ananta' on page 2 undefined on input line 95.
+
+
+
+LaTeX Warning: Citation `patel2013ananta' on page 2 undefined on input line 96.
+
+
+<Figs/google_lb.png, id=13, 692.5875pt x 580.1675pt>
+File: Figs/google_lb.png Graphic file (type png)
+<use Figs/google_lb.png>
+Package pdftex.def Info: Figs/google_lb.png  used on input line 104. on input l
+ine 104.
+Package pdftex.def Info: Requested size: 238.6189pt x 199.88356pt on input line
+ 104.
+
+LaTeX Warning: Citation `MartinA.Brown2017' on page 2 undefined on input line 1
+17.
+
+
+LaTeX Warning: Citation `Marmol2015' on page 2 undefined on input line 117.
+
+<Figs/new_lb.png, id=14, 703.62875pt x 580.1675pt>
+File: Figs/new_lb.png Graphic file (type png)
+<use Figs/new_lb.png>
+Package pdftex.def Info: Figs/new_lb.png  used on input line 120. on input line
+ 120.
+Package pdftex.def Info: Requested size: 238.6189pt x 196.74973pt on input line
+ 120.
+
+LaTeX Warning: Citation `rekhter2005border' on page 2 undefined on input line 1
+27.
+
+[2 <./Figs/google_lb.png>]
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/it' will be
+(Font)              scaled to size 10.0pt on input line 145.
+LaTeX Font Info:    Font shape `T1/ntxtlf/bx/n' in size <9> not available
+(Font)              Font shape `T1/ntxtlf/b/n' tried instead on input line 146.
+
+LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
+(Font)              scaled to size 9.0pt on input line 146.
+
+
+LaTeX Warning: Citation `Zhang2000' on page 3 undefined on input line 146.
+
+
+LaTeX Warning: Citation `Zhang2000' on page 3 undefined on input line 146.
+
+
+LaTeX Warning: Citation `hinden2004virtual' on page 3 undefined on input line 1
+52.
+
+<Figs/ipvs-ingress-schem.png, id=18, 904.37875pt x 528.97626pt>
+File: Figs/ipvs-ingress-schem.png Graphic file (type png)
+<use Figs/ipvs-ingress-schem.png>
+Package pdftex.def Info: Figs/ipvs-ingress-schem.png  used on input line 160. o
+n input line 160.
+Package pdftex.def Info: Requested size: 238.6189pt x 139.5646pt on input line 
+160.
+[3 <./Figs/new_lb.png>]
+
+LaTeX Warning: Citation `ktaka_ccmp_2017_826894' on page 4 undefined on input l
+ine 179.
+
+
+LaTeX Warning: Citation `K8sIngress2017' on page 4 undefined on input line 179.
+
+
+
+LaTeX Warning: Citation `hubert2002linux' on page 4 undefined on input line 188
+.
+
+
+LaTeX Warning: Citation `dpdkorg' on page 4 undefined on input line 190.
+
+
+LaTeX Warning: Citation `rizzo2012netmap' on page 4 undefined on input line 190
+.
+
+
+LaTeX Warning: Citation `deri2004improving' on page 4 undefined on input line 1
+90.
+
+
+LaTeX Warning: Citation `eisenbud2016maglev' on page 4 undefined on input line 
+190.
+
+
+LaTeX Warning: Citation `bertin2017xdp' on page 4 undefined on input line 196.
+
+
+LaTeX Warning: Citation `Glozer2016' on page 4 undefined on input line 209.
+
+[4 <./Figs/ipvs-ingress-schem.png>]
+<Figs/benchmark-schem.png, id=25, 683.55376pt x 504.88625pt>
+File: Figs/benchmark-schem.png Graphic file (type png)
+<use Figs/benchmark-schem.png>
+Package pdftex.def Info: Figs/benchmark-schem.png  used on input line 215. on i
+nput line 215.
+Package pdftex.def Info: Requested size: 238.6189pt x 176.24289pt on input line
+ 215.
+<Figs/ipvs-iptables-nginx_2figs.png, id=26, 341.1144pt x 475.2957pt>
+File: Figs/ipvs-iptables-nginx_2figs.png Graphic file (type png)
+<use Figs/ipvs-iptables-nginx_2figs.png>
+Package pdftex.def Info: Figs/ipvs-iptables-nginx_2figs.png  used on input line
+ 248. on input line 248.
+Package pdftex.def Info: Requested size: 238.6189pt x 332.47989pt on input line
+ 248.
+<Figs/latency_cdf_rps_40pods.png, id=28, 379.4175pt x 254.1495pt>
+File: Figs/latency_cdf_rps_40pods.png Graphic file (type png)
+<use Figs/latency_cdf_rps_40pods.png>
+Package pdftex.def Info: Figs/latency_cdf_rps_40pods.png  used on input line 25
+4. on input line 254.
+Package pdftex.def Info: Requested size: 238.6189pt x 159.83969pt on input line
+ 254.
+ [5 <./Figs/benchmark-schem.png> <./Figs/ipvs-iptables-nginx_2figs.png>]) [6 <.
+/Figs/latency_cdf_rps_40pods.png>]
+(./paper.aux) ) 
 Here is how much of TeX's memory you used:
- 4721 strings out of 492990
- 58980 string characters out of 6132637
- 110675 words of memory out of 5000000
- 8211 multiletter control sequences out of 15000+600000
- 72713 words of font info for 82 fonts, out of 8000000 for 9000
+ 6157 strings out of 492990
+ 82250 string characters out of 6132637
+ 151871 words of memory out of 5000000
+ 9589 multiletter control sequences out of 15000+600000
+ 81089 words of font info for 85 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 28i,11n,35p,855b,268s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2017/texmf-dist/fonts/enc/dvips/tex-gyre/q-ts1.enc}{/usr/
-local/texlive/2017/texmf-dist/fonts/enc/dvips/newtx/ntx-ec-tlf.enc}{/usr/local/
-texlive/2017/texmf-dist/fonts/enc/dvips/tex-gyre/q-ec.enc}</usr/local/texlive/2
-017/texmf-dist/fonts/type1/public/tex-gyre/qhvr.pfb></usr/local/texlive/2017/te
-xmf-dist/fonts/type1/public/tex-gyre/qtmb.pfb></usr/local/texlive/2017/texmf-di
-st/fonts/type1/public/tex-gyre/qtmbi.pfb></usr/local/texlive/2017/texmf-dist/fo
-nts/type1/public/tex-gyre/qtmr.pfb></usr/local/texlive/2017/texmf-dist/fonts/ty
-pe1/public/newtx/txsys.pfb>
-Output written on paper.pdf (1 page, 92079 bytes).
+ 39i,11n,37p,855b,320s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/local/texlive/2017/texmf-dist/fonts/enc/dvips/tex-gyre/q-t
+s1.enc}{/usr/local/texlive/2017/texmf-dist/fonts/enc/dvips/newtx/ntx-ec-tlf.enc
+}{/usr/local/texlive/2017/texmf-dist/fonts/enc/dvips/tex-gyre/q-ec.enc}</usr/lo
+cal/texlive/2017/texmf-dist/fonts/type1/public/tex-gyre/qhvr.pfb></usr/local/te
+xlive/2017/texmf-dist/fonts/type1/public/tex-gyre/qtmb.pfb></usr/local/texlive/
+2017/texmf-dist/fonts/type1/public/tex-gyre/qtmbi.pfb></usr/local/texlive/2017/
+texmf-dist/fonts/type1/public/tex-gyre/qtmr.pfb></usr/local/texlive/2017/texmf-
+dist/fonts/type1/public/tex-gyre/qtmri.pfb></usr/local/texlive/2017/texmf-dist/
+fonts/type1/public/newtx/txsys.pfb>
+Output written on paper.pdf (6 pages, 517823 bytes).
 PDF statistics:
- 33 PDF objects out of 1000 (max. 8388607)
- 24 compressed objects within 1 object stream
+ 61 PDF objects out of 1000 (max. 8388607)
+ 38 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 31 words of extra memory for PDF output out of 10000 (max. 10000000)
 

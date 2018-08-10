@@ -101,7 +101,7 @@ The proposed load balancer by the author is different in that it is aimed to be 
 \subsection{Overview}\label{Network}
 Here we discuss overall architecture of the proposed load balancer.
 \begin{figure}
-\includegraphics[width=\columnwidth]{Figs/google_lb.png}
+\includegraphics[width=\columnwidth]{Figs/google_lb}
 \caption{Conventional architecture. Software load balancers are set up via cloud API. }
 \label{fig:google_lb}
 \end{figure}

@@ -10,8 +10,8 @@
 %\documentclass[letter]{ieice}
 %\documentclass[brief]{ieice}
 %\usepackage[dvips]{graphicx}
-\usepackage[pdftex]{graphicx,xcolor}
-%\usepackage[dvipdfmx]{graphicx,xcolor}
+%\usepackage[pdftex]{graphicx,xcolor}
+\usepackage[dvipdfmx]{graphicx,xcolor}
 \usepackage[fleqn]{amsmath}
 \usepackage{newtxtext}
 \usepackage[varg]{newtxmath}
