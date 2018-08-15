@@ -1,40 +1,77 @@
 \section{Introduction}
 
-Recently, launching web services on cloud computing infrastructure is getting more popular.
-Launching web services on the cloud is easier than launching them on on-premise data centers.
-A web service on the cloud becomes scalable, which means it can accommodate a large amount of traffic from the Internet by increasing the number of web servers, on demand.
-To distribute high volume traffic from the Internet to thousands of web servers load balancers are often used.
-Major cloud providers have developed software load balancers\cite{eisenbud2016maglev,patel2013ananta} as part of their infrastructures, which they claim to have a high-performance level and scalability.
-In the case of on-premise data centers, one can use proprietary hardware load balancers.
-The actual implementation and the performance level of those existing load balancers are very different.
+Recently, Linux containers have drawn significant amount of attention because they are lightweight, portable, and repeatable.
+Linux containers are generally more lightweight than virtual machine (VM) clusters, 
+because the containers share the kernel with the host operating system (OS), even though they maintain separate execution environments. 
+They are generally portable because the process execution environments are archived into tar files, 
+so whenever one attempts to run a container, the exact same file systems are restored from the archives 
+even when totally different data centers are used. 
+This means that containers can provide repeatable and portable execution environments.
+%
+For the same reasons, Linux containers are attractive for web services as well, 
+and it is expected that web services consisting of container clusters would be 
+capable of being migrated easily for variety of purposes. For example disaster recovery, 
+cost performance improvemets, legal compliance, and shortening the geographical distance to customers 
+are the main concerns for web service providers in e-commece, gaming, Financial technology(Fintech) and Internet of Things(IoT) field.
+%
 
-As for another issue regarding web services,
-there are also needs to use multiple of cloud providers or on-premise data centers seamlessly, which spread across the world, to prepare for the disaster, to lower the cost or to comply with the legal requirement.
-Linux container technology\cite{menage2007adding} facilitates these usages by providing container cluster management system as a middleware,
-where one can deploy a web service that consists of a cluster of containers without modification even on different infrastructures.
-However, in reality, it is difficult to do so, because existing load balancers are very different and are not included in the container cluster management system.
-Therefore, users should always manually adjust their web services to the infrastructure.
+Kubernetes\cite{K8s2017}, which is one of the popular container cluster management systems, 
+enables easy deployment of container clusters.
+Since Kubernetes hides the differences in the base environments, users can easily deploy a web service on different 
+cloud providers or on on-premise data centers, without adjusting the container cluster configurations to the new environment. 
+This allows a user to easily migrate a web service consisting of a container cluster even to the other side of the world. 
+A user starts the container cluster in the new location, route the traffic there, 
+then stop the old container cluster at his or her convenience.
+This is a typical web service migration scenario.
 
-In short, there exist several software load balancers that are specific to cloud vendors and on-premise data centers.
-The differences among them are the major obstacles to provide uniform container cluster platform, which is necessary to realize web service migration across the different cloud providers and on-premise data centers.
+However, this scenario only works when the user migrates a container cluster among major cloud providers including Google Cloud Platform (GCP), 
+Amazon Web Services (AWS), and Microsoft Azure.
+The Kubernetes does not include a load balancer, and is heavily dependent on external load balancers that are set up on the fly 
+by cloud providers through their application protocol interfaces (APIs). 
+These external load balancers distribute incoming traffic to every server that hosts containers.
+The traffic is then distributed again to destination containers using iptables destination 
+network address translation (DNAT)\cite{MartinA.Brown2017,Marmol2015} rules in a round-robin manner. 
+The problem happens in the environment with a load balancer that is not supported by the Kubernetes, 
+e.g. in an on-premise data center with a bare metal load balancer. 
+In such environments, the user needs to manually configure 
+the static route for inbound traffic in an ad-hoc manner. 
+Since the Kubernetes fails to provide an uniform environment from a container cluster view point,
+migrating container clusters among the different environments will always be a burden.
 
-To address this problem, we propose a portable and scalable software load balancer that can be used in any environment including cloud providers and in on-premise data centers.
-We can include this load balancer as a part of a container cluster management system, e.g., Kubernetes\cite{K8s2017}, which acts as a common middleware on which web services run.
-Users now do not need manual adjustment of their services to the infrastructures.
-We will implement the proposed software load balancer using following technologies;
-1) To make the load balancer usable in any environment, we containerize ipvs\cite{Zhang2000} using Linux container technology\cite{menage2007adding}.
-2) To make the load balancer scalable, we make it capable of being run in parallel using Equal Cost Multi-Path(ECMP) technique\cite{al2008scalable}.
-In order to make the load balancer's performance level to meet the need for 10Gbps network speed, a software load balancer that better performs than ipvs is required.
-We also implement the novel load balancer using eXpress Data Plane(XDP) technology\cite{bertin2017xdp}.
+In order to solve this problem by eliminating the dependency on external load balancer,
+herein we propose a containerized software load balancer that is run by Kubernetes as  
+as a part of web services consisting of container cluster.
+It enables a user to easily deploy a web service on different environment without modification, 
+because the load balancer is included in the web service itself. 
+To accomplish this, we will containerize Linux kernel's Internet Protocol Virtual Server (IPVS)\cite{Zhang2000} 
+Layer 4 load balancer using an existing Kubernetes ingress\cite{K8sIngress2017} framework, as a proof of concept.
+%
+%
+To prove that our approach will not significantly deteriorate the performance,  
+we will also compare the performance of our proposed load balancer with those of 
+iptables DNAT load balancer and the Nginx Layer 7 load balancing. 
+%
+The results indicated that the proposed load balancer could improve the portability of container clusters 
+without performance degradation compared with the existing load balancer.
+The performance of the proposed load balancer may be affected by the network configurations of overlay network 
+and distributed packet processing. 
+We also evaluate how the network configurations affects the performance and discusses 
+the best setting that derives the best performance.
 
-The outcome of our study will benefit users who want to deploy their web services on any cloud provider where no scalable load balancer is provided, to achieve high scalability.
-Moreover, the result of our study will potentially benefit users who want to use a group of different cloud providers and on-premise data centers across the globe, as if it were a single computer on which their web services run.
+The contributions of this paper are as follows: 
+1) We propose a portable software load balancer that is runnable on any cloud provider, or on on-premise data centers, 
+as a part of a container cluster.
+2) We discuss feasibility of the proposed load balancer by comparing its performance with other load balancers.
+3) We also discuss usable overlay network configurations and clarify the importance of techniques 
+that will  draw the best performance from such load balancers.  
 
 The rest of the paper is organized as follows.
 Section \ref{Related Work} highlights work that deals specifically with container cluster migration, 
 software load balancer containerization, and load balancer related tools within the context of the container technology. 
-Section \ref{Architecture} will explain existing architecture problems and propose our solutions.
-In Section \ref{Experiments}, experimental results for containerized ipvs are discussed,  
+Section \ref{Load balancers in Kubernetes cluster} will explain existing architecture problems and propose our solutions.
+In Section \ref{Performance Measurement}, experimental conditions and the parameters 
+that we considered to be important in our experiment will be described in detail.
+Then, we will show our experimental results and discuss the obtained performance characteristics in Section~\ref{Result and Discussion},  
 which is followed by a summary of our work in Section~\ref{Conclusions}.
 
 \section{Related Work}\label{Related Work}
@@ -97,6 +134,17 @@ Ananta can be solely used in Microsoft's Azure cloud infrastructure\cite{patel20
 The proposed load balancer by the author is different in that it is aimed to be used in every cloud provider and on-premise data centers.
 
 \section{Proposed Architecture}\label{Architecture}
+
+
+
+\section{Implementation}\label{Implementation}
+
+\section{Evaluation}\label{Evaluation}
+
+\subsection{Functionality}\label{Functionality}
+
+\subsection{Performance}\label{Performance}
+
 
 \subsection{Overview}\label{Network}
 Here we discuss overall architecture of the proposed load balancer.
