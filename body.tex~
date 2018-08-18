@@ -41,7 +41,6 @@ migrating container clusters among the different environments will always be a b
 In order to solve this problem by eliminating the dependency on external load balancer,
 we have proposed a containerized software load balancer that is run by Kubernetes as  
 a part of web services consisting of container cluster in the previous work\cite{takahashi2018portable}.
-
 It enables a user to easily deploy a web service on different environment without modification, 
 because the load balancer is included in the web service itself. 
 
@@ -57,23 +56,20 @@ The results indicated that the proposed load balancer could improve the portabil
 without performance degradation compared with the existing load balancer.
 
 However, in our previous work, we have not discussed the redundancy of such load balancers.
-
 Routing traffic to one of the load balancers while keeping redundancy in the container environment is a complex issue,
 because standard Layer 2 rendandacy protocols, e.g. Virtual Router Redundancy Protocol(VRRP) or OSPF\cite{moy1997ospf} that uses multicast, 
 can not be used in many cases.
 Further more, providing uniform methods independent of various cloud environments and on-premise datacenter is much more difficult.   
 
 In this paper we propose a software load balancer with ECMP redundancy for container cluster environment.
-
-We containerize the linux kernels IPVS together with exabgp, and setup a redundant load balancer deployment using Kubernetes.
-We also evaluate functionality and scalability of such a load balancer.
-
+We containerize an open source BGP software, exabgp, and launch it with containerized linux kernels IPVS load balancer in a sngle pod using Kubernetes.
+We set up a redundant load balancer cluster using such pods and evaluate its functionality.  
+We also measure preliminary performance of such a load balancer cluster.
 
 The contributions of this paper are as follows: 
-1) We propose a portable software load balancer with ECMP redundacy as a part of a container cluster.
-2) We demonstrate functionality of such load balancers using OSS networking softwares.
+1) We propose a portable software load balancer with ECMP redundacy usable in a container cluster environment.
+2) We demonstrate functionality of such load balancers using existing Open Source Software(OSS) networking tools.
 3) We also measure the performance of such load balancers.
-4) Practical setups are demonstrated, and proven to function.
 
 The rest of the paper is organized as follows.
 Section \ref{Related Work} highlights work that deals specifically with container cluster migration, 
@@ -144,64 +140,197 @@ Ananta can be solely used in Microsoft's Azure cloud infrastructure\cite{patel20
 The proposed load balancer by the author is different in that it is aimed to be used in every cloud provider and on-premise data centers.
 
 \section{Proposed Architecture}\label{Architecture}
-\subsection{Basic Architecture of Kubernetes Cluster}
-Discuss K8S LB architecture
 
-\subsection{Overlay network}
-Since the knowledge of the overlay network is important to setup redundant load balancers, 
-we briefly explain an abstract concept of overlay network that is common to existing overlay network including flannel and calico.
+\subsection{A containerized Load balancer}
+
+\subsubsection{Conventional Basic Architecture of Kubernetes Cluster}
+
 
 \begin{figure}
+\includegraphics[width=\columnwidth]{Figs/K8sConventional}
+\caption{Conventional architecture of a Kubernetes cluster.}
+\label{fig:K8sConventional}
+\end{figure}
+
+Problems commonly occur when the Kubernetes container management system is used outside of recommended cloud providers(such as GCP or AWS).
+Figure~\ref{fig:K8sConventional} shows an exemplified Kubernetes cluster.
+A Kubernetes cluster typically consists of a master and nodes. They can be physical servers or VMs.
+On the master, daemons that control the Kubernetes cluster are typically deployed. 
+These daemons include, apiserver, scheduler, controller-manager and etcd. 
+On the nodes, the kubelet daemon will run {\it pods}, depending the PodSpec information obtained from the apiserver on the master.
+A {\em pod} is a group of containers that share same net name space and cgroups, 
+and is the basic execution unit in a Kubernetes cluster.
+
+When a service is created, the master will schedule where to run {\em pods} and kubelets on the nodes will launch them accordingly.
+At the same time, the masters will send out requests to cloud provider API endpoints, asking them to set up external load balancers.
+The proxy daemon on the nodes will also setup iptables DNAT\cite{MartinA.Brown2017} rules. 
+The Internet traffic will then be evenly distributed by the external load balancer to nodes, 
+after which it will be distributed again by the DNAT rules on the nodes to the designated {\em pods}. 
+The returning packets will follow the exact same route as the incoming ones.
+
+This architecture has the followings problems: 
+1) Having external load balancers whose APIs are supported by the Kubernetes daemons is a prerequisite. 
+There are numerous load balancers which is not supported by the Kubernetes.
+These include the bare metal load balancers for on-premise data centers.  
+In such cases, a user could manually setup the routing table on the gateway so that the traffic would be routed to one of the nodes.
+Then the traffic would be distributed by the DNAT rules on the node to the designated {\em pods}.
+However, this approach would require complicated network configuration and significantly degrade the portability of container clusters.
+2) Distributing the traffic twice, first on the external load balancers and second on each node, 
+complicates the administration of packet routing. 
+Imagine a situation in which the DNAT table on one of the nodes malfunctions.
+In such a case, only occasional timeouts would be observed, which would make it very difficult to find out which node was malfunctioning.   
+
+In short, 1) Kubernetes can be used only in limited environments where the external load balancers are supported, 
+and 2) the routes incoming traffic follow are very complex.
+
+In order to address these problems, we propose a containerized software load balancer 
+that is deployable in any environment even if there are no external load balancers.
+
+\subsubsection{Proposed architecture with a potable load balancer}
+
+\begin{figure}
+\includegraphics[width=\columnwidth]{Figs/K8sProposed}
+\caption{Kubernetes cluster with proposed load balancer.}
+\label{fig:K8sProposed}
+\end{figure}
+
+Figure~\ref{fig:K8sProposed} shows the proposed  Kubernetes cluster architecture, 
+which has the following characteristics:
+1) Each load balancer itself is run as a {\em pod} by Kubernetes. 
+2) Load balancer configurations are dynamically updated based on information about running {\em pods}.
+%%3) There exist multiple load balancers for redundancy. 
+The proposed load balancer can resolve the conventional architecture problems, as follows:
+Since the load balancer itself is containerized, load balancer can run in any environment including on-premise data centers, 
+even without external load balancers that is supported by Kubernetes.
+The incoming traffic is directly distributed to designated {\em pods} by the load balancer. 
+It makes the administration, e.g. finding malfunctions, easier.
+
+\subsection{Load balancer redundancy}
+
+\subsubsection{Overlay network}
+Since the knowledge of the overlay network is essential to set up redundant load balancers,
+we briefly explain an abstract concept of overlay network that is common to existing overlay network including flannel\cite{coreos_2018} and calico\cite{project_calico}.
+
+\begin{figure}[tb]
+\begin{center}
 \includegraphics[width=\columnwidth]{Figs/overlay.png}
+\end{center}
 \caption{Network architecture of an exemplified container cluster system. An overlay networks is .... }
 \label{fig:overlay}
 \end{figure}
 
-Figure~\ref{fig:overlay} shows schematic diagram of network architecture of a container cluster system. 
+Fig.~\ref{fig:overlay} shows schematic diagram of network architecture of a container cluster system. 
+An overlay network consists of appropriate routing tables on nodes, optionally tunneling setup using ipip or vxlan.
+The overlay network is the network for containers to communicate with each other. 
+The node network is the network for nodes to communicate with each other.
+When the ipvs container in the Fig.~\ref{fig:overlay} communicates with the other nodes, 
+the nodes can properly route the packets because they have the routes to 172.16.0.0/16 in their routing table, 
+which is a part of overlay network setups.
+When a container communicates with the router, the souce IP address must be translated by Source Network Address Translation(SNAT) rules on each node, 
+because the router has no knowledge of the 172.16.0.0/16 network.
 
-An overlay network consists of appropriate routing tables on nodes, optionally tunneling using ipip or vxlan.
- 
-The overlay network is the network for containers to communicate with each other. The node network is the network for nodes to communicate with each other.
+\subsubsection{Redundancy with ECMP}
 
-When the ipvs container in the Fig.1 communicates with the other nodes, the nodes can properly route the packets because they have the routes to 172.16.0.0/16 in their routing table, which is a part of overlay network setups.
+The Equal Cost Multi Path(ECMP) is a functionality a router may support, where the router has multiple nexthops with equal cost(priority) to a network and distribute the traffic depending on the hash of the flow 5 tuple(source IP, destination IP, source port, destination port, protocol). 
+The multiple nexthops and their cost are often populated using the Border Gateway Protocol(BGP) protocol.  
 
-When a container in the Fig.1 communicates with the router, packets from 172.16.0.0/16 network are translated by SNAT setup on each node.
-
-\subsection{ECMP redundancy in container network}
- 
-\begin{figure}
+\begin{figure}[tb]
+\begin{center}
 \includegraphics[width=\columnwidth]{Figs/ecmp.png}
+\end{center}
 \caption{Network architecture of an exemplified container cluster system. An overlay networks is .... }
 \label{fig:ecmp}
 \end{figure}
 
-Figure~\ref{fig:ecmp} shows our poroposed redundancy architecture for software load balanceer.
+Fig.~\ref{fig:ecmp} shows our poroposed redundancy architecture for software load balanceer.
 
-Since the router has no knowledge of overlay network, the communication between the router and ipvs containers have to be via SNAT.
-If we were to setup BGP peering directly between containers and the router, such connections are between a node’s IP address and the router’s. 
-In such cases, the router might not be able to set up multiple BGP session from a single node.
+We propose to use a node with the knowledge of overlay network as a Route Reflector(RR), in other to alleviate the following problems.
+1) If we were to setup BGP peering directly between a load balancer and the router, the IP address of the container should be translated using SNAT rules by the nodes, since the route has no knowledge of the overlay network and can not send out returining packet properly.
+However, if we use SNAT, the router only see the node IP address as the peer IP address, and hence the router will not be able to set up multiple BGP session from a single node.
+This poses limitation that a sigle node can accomodate only one load balancer at most.
 
-In other to alleviate this, we used a node with the knowledge of overlay network as a route reflector. 
-Since the communication between the route reflector and ipvs containers are between the node network IPs and overlay network IPs, 
+2) If we were to setup BGP peering directly between a load balancer and the router, the router should support so called dynamic peering(or dynamic neighbor) functions, where one does not have to write exact IP address of peers in the configuration.
+This is important because one can not predict exact IP addresses of the load balancer containers before he launches them.
+Even if the router supports such functions, the administrator of the upstream router may not like accepting dynamic peering from random IP addresses for security reasons.
+
+By introducing route reflector, BGP sessions with load balancers are set up dynamically and multiple BGP sessions from a single node can be established.
+The upstream router only needs to accept BGP session from the RR.
+
+The benefit of ECMP
+
+
+Since the router has no knowledge of the overlay network, 
+the source IP address of a connection that is initiated by a container has to be translated using SNAT rules on the node. 
+In such a case, the router can only see the IP address of the host where the container is running. 
+
+
+Since the communication between the route reflector and ipvs containers does not require SNAT, 
 the route reflector can accept sessions from multiple ipvs containers on a single node.    
 
-\begin{figure}
-\includegraphics[width=\columnwidth]{Figs/ecmp.png}
+\subsubsection{Redundancy with VRRP}
+
+\begin{figure}[tb]
+\begin{center}
+\includegraphics[width=\columnwidth]{Figs/vrrp.png}
+\end{center}
 \caption{Network architecture of an exemplified container cluster system. An overlay networks is .... }
 \label{fig:vrrp}
 \end{figure}
 
-Figure~\ref{fig:vrrp} shows VRRP redandancy as a comparison.
+Fig.~\ref{fig:vrrp} shows an alternative redandancy setup using VRRP protocol.
+In the case of VRRP, the load balancer container should be able to use the node net namespace for the following two reasons.
+1) When failover occurs, the new master sends gratuitous Adress Resolution Packets(ARP) packets in order to update the ARP cache of the upstream router during the transition.
+Such GARP packets should consist of the virtual IP address of the load balancer and the MAC address of the node where the new master load balancer is running.
+%
+2) Furthermore, the active load balancer sends out periodic advertisement using UDP multicast packet to inform existence of current master.
+The UDP multicast is often unsupported in overlay network used by container cluster environment, and hence the load balancer needs to be able to use the node net namespace.
 
+VRRP programs also support unicast advertisement by specifying IP addresses of peer load balancers when it starts.
+However, container cluster management system randomly assign IP addresses of containers when it launches them.
+Therefore the unicast mode is not usable in container cluster environment.
 
-ECMP is better.
+The other drawback compared with the ECMP case is that the redundancy of VRRP is provided in Active-Backup manner.
+This means that a single software load balancer limits the overall performance of the load balancer cluster.
 
 \section{Implementation}\label{Implementation}
 
 \subsection{IPVS containerization}
 
+\begin{figure}
+\includegraphics[width=\columnwidth]{Figs/IPVS-ingress-schem}
+\caption{Implementation}
+\label{fig:IPVS-ingress-schem}
+\end{figure}
+
+The proposed load balancer needs to dynamically reconfigure the IPVS balancing rules whenever {\em pods} are created/deleted. 
+Figure~\ref{fig:IPVS-ingress-schem} is a schematic diagram to show the dynamic reconfiguration of the IPVS rules.
+The right part of the figure shows the enlarged view of one of the nodes where the load balancer pod(LB2) is deployed.
+Two daemon programs, controller and keepalived, run in the container inside the LB2 pod are illustrated.
+The keepalived manages Linux kernel's IPVS rules depending on the ipvs.conf configuration file.
+It is also capable of health-checking the liveliness of {\em real server}, 
+which is represented as a combination of the IP addresses and port numbers of the target {\em pods}. 
+If the health check to a {\em real server} fails, keepalived will remove that {\em real server} from the IPVS rules.
+
+The controller monitors information concerning the running {\em pods} of a service 
+in the Kubernetes cluster by consulting the apiserver running on the master.
+Whenever {\em pods} are created or deleted, the controller will automatically regenerate an appropriate ipvs.conf 
+and issue SIGHUP to keepalived.
+Then, keepalived will reload the ipvs.conf and modify the kernel's IPVS rules accordingly.
+The actual controller\cite{ktaka_ccmp_2017_826894} is implemented using the Kubernetes ingress controller\cite{K8sIngress2017} framework. 
+By importing existing Golang package, \enquote{k8s.io/ingress /core/pkg/ingress}, we could simplify the implementation, e.g. 
+120 lines of code.  
+
+%In this way, the IPVS's balancing rules inside Linux kernel are maintained so that it can distribute the incoming traffic only to the living pods.
+
+Configurations for capabilities were needed in the implementation: adding the CAP\_SYS\_MODULE capability 
+to the container to allow the kernel to load required kernel modules inside a container, 
+and adding CAP\_NET\_ADMIN capability to the container to allow keepalived to manipulate the kernel's IPVS rules. 
+For the former case, we also needed to mount the \enquote{/lib/module} of the node's file system on the container's file system.
 
 \subsection{BGP software containerization}
+
+
+
 
 \subsection{Proof of concept system architecture}
 

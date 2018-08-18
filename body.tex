@@ -231,8 +231,8 @@ because the router has no knowledge of the 172.16.0.0/16 network.
 
 \subsubsection{Redundancy with ECMP}
 
-The Equal Cost Multi Path(ECMP) is a functionality a router may support, where the router has multiple nexthops with equal cost(priority) to a network and distribute the traffic depending on the hash of the flow 5 tuple(source IP, destination IP, source port, destination port, protocol). 
-The multiple nexthops and their cost are often populated using the Border Gateway Protocol(BGP) protocol.  
+The Equal Cost Multi-Path(ECMP) is a functionality a router may support, where the router has multiple next hops with equal cost(priority) to a network, and distribute the traffic depending on the hash of the flow 5 tuples(source IP, destination IP, source port, destination port, protocol).
+The multiple next hops and their cost are often populated using the Border Gateway Protocol(BGP) protocol.
 
 \begin{figure}[tb]
 \begin{center}
@@ -242,30 +242,24 @@ The multiple nexthops and their cost are often populated using the Border Gatewa
 \label{fig:ecmp}
 \end{figure}
 
-Fig.~\ref{fig:ecmp} shows our poroposed redundancy architecture for software load balanceer.
+Fig.~\ref{fig:ecmp} shows our proposed redundancy architecture for software load balancers.
 
 We propose to use a node with the knowledge of overlay network as a Route Reflector(RR), in other to alleviate the following problems.
-1) If we were to setup BGP peering directly between a load balancer and the router, the IP address of the container should be translated using SNAT rules by the nodes, since the route has no knowledge of the overlay network and can not send out returining packet properly.
-However, if we use SNAT, the router only see the node IP address as the peer IP address, and hence the router will not be able to set up multiple BGP session from a single node.
-This poses limitation that a sigle node can accomodate only one load balancer at most.
+1) If we were to setup BGP peering directly between a load balancer and the router, the IP address of the container should be translated using SNAT rules by the nodes, since the route has no knowledge of the overlay network and cannot send out returning packet correctly.
+However, if we use SNAT, the router only see the node IP address as the peer, and hence the router cannot set up multiple BGP session from a single node.
+This problem poses limitation that a single node can accommodate only one load balancer at most.
 
-2) If we were to setup BGP peering directly between a load balancer and the router, the router should support so called dynamic peering(or dynamic neighbor) functions, where one does not have to write exact IP address of peers in the configuration.
-This is important because one can not predict exact IP addresses of the load balancer containers before he launches them.
+2) If we were to setup BGP peering directly between a load balancer and the router, the router should support so-called dynamic peering(or dynamic neighbor) functions, where one does not have to write exact IP address of peers in the configuration.
+This function is essential because one can not predict exact IP addresses of the load balancer containers before he launches them.
 Even if the router supports such functions, the administrator of the upstream router may not like accepting dynamic peering from random IP addresses for security reasons.
 
-By introducing route reflector, BGP sessions with load balancers are set up dynamically and multiple BGP sessions from a single node can be established.
-The upstream router only needs to accept BGP session from the RR.
+By introducing route reflector, BGP sessions with load balancers are set up dynamically, and multiple BGP sessions from a single node can be established.
+The upstream router does not need to accept BGP session from containers with random IP addresses, but only from the RR with fixed IP address.
 
-The benefit of ECMP
-
-
-Since the router has no knowledge of the overlay network, 
-the source IP address of a connection that is initiated by a container has to be translated using SNAT rules on the node. 
-In such a case, the router can only see the IP address of the host where the container is running. 
-
-
-Since the communication between the route reflector and ipvs containers does not require SNAT, 
-the route reflector can accept sessions from multiple ipvs containers on a single node.    
+The other notable benefit of the ECMP setup is the fact that it is scalable.
+All load balancer that claims as the next hop is active, i.e., accept traffic depending on the flow tuple.
+The traffic distribution is done by the upstream router. Hence the overall throughput is determined by the router.
+If a software load balancer is capable of handling 1 Gbps equivalent of traffic and the upstream router is capable of handling 10 Gbps, it is worthwhile launching 10 of the software load balancers to fill up maximum throughput of the upstream router.
 
 \subsubsection{Redundancy with VRRP}
 
