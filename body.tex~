@@ -40,7 +40,7 @@ migrating container clusters among the different environments will always be a b
 
 In order to solve this problem by eliminating the dependency on external load balancer,
 we have proposed a containerized software load balancer that is run by Kubernetes as  
-a part of web services consisting of container cluster in the previous work\cite{Takahashi2018}.
+a part of web services consisting of container cluster in the previous work\cite{takahashi2018portable}.
 
 It enables a user to easily deploy a web service on different environment without modification, 
 because the load balancer is included in the web service itself. 
@@ -146,16 +146,52 @@ The proposed load balancer by the author is different in that it is aimed to be 
 \section{Proposed Architecture}\label{Architecture}
 \subsection{Basic Architecture of Kubernetes Cluster}
 Discuss K8S LB architecture
+
 \subsection{Overlay network}
 Since the knowledge of the overlay network is important to setup redundant load balancers, 
 we briefly explain an abstract concept of overlay network that is common to existing overlay network including flannel and calico.
-Fig. xx shows 
+
+\begin{figure}
+\includegraphics[width=\columnwidth]{Figs/overlay.png}
+\caption{Network architecture of an exemplified container cluster system. An overlay networks is .... }
+\label{fig:overlay}
+\end{figure}
+
+Figure~\ref{fig:overlay} shows schematic diagram of network architecture of a container cluster system. 
+
+An overlay network consists of appropriate routing tables on nodes, optionally tunneling using ipip or vxlan.
+ 
+The overlay network is the network for containers to communicate with each other. The node network is the network for nodes to communicate with each other.
+
+When the ipvs container in the Fig.1 communicates with the other nodes, the nodes can properly route the packets because they have the routes to 172.16.0.0/16 in their routing table, which is a part of overlay network setups.
+
+When a container in the Fig.1 communicates with the router, packets from 172.16.0.0/16 network are translated by SNAT setup on each node.
 
 \subsection{ECMP redundancy in container network}
-  
-Fig. xx shows our poroposed redundancy architecture for software load balanceer.
+ 
+\begin{figure}
+\includegraphics[width=\columnwidth]{Figs/ecmp.png}
+\caption{Network architecture of an exemplified container cluster system. An overlay networks is .... }
+\label{fig:ecmp}
+\end{figure}
 
-Fig. yy shows VRRP redandancy as a comparison.
+Figure~\ref{fig:ecmp} shows our poroposed redundancy architecture for software load balanceer.
+
+Since the router has no knowledge of overlay network, the communication between the router and ipvs containers have to be via SNAT.
+If we were to setup BGP peering directly between containers and the router, such connections are between a node’s IP address and the router’s. 
+In such cases, the router might not be able to set up multiple BGP session from a single node.
+
+In other to alleviate this, we used a node with the knowledge of overlay network as a route reflector. 
+Since the communication between the route reflector and ipvs containers are between the node network IPs and overlay network IPs, 
+the route reflector can accept sessions from multiple ipvs containers on a single node.    
+
+\begin{figure}
+\includegraphics[width=\columnwidth]{Figs/ecmp.png}
+\caption{Network architecture of an exemplified container cluster system. An overlay networks is .... }
+\label{fig:vrrp}
+\end{figure}
+
+Figure~\ref{fig:vrrp} shows VRRP redandancy as a comparison.
 
 
 ECMP is better.

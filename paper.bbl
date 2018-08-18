@@ -1,0 +1,89 @@
+\begin{thebibliography}{10}
+
+\bibitem{K8s2017}
+T.K. Authors, ``Kubernetes | production-grade container orchestration,'' 2017.
+
+\bibitem{MartinA.Brown2017}
+{Martin A. Brown}, ``{Guide to IP Layer Network Administration with Linux},''
+  2007.
+
+\bibitem{Marmol2015}
+V.~Marmol, R.~Jnagal, and T.~Hockin, ``{Networking in Containers and Container
+  Clusters},'' Netdev, 2015.
+
+\bibitem{takahashi2018portable}
+K.~Takahashi, K.~Aida, T.~Tanjo, and J.~Sun, ``A portable load balancer for
+  kubernetes cluster,'' Proceedings of the International Conference on High
+  Performance Computing in Asia-Pacific Region, pp.222--231, ACM, 2018.
+
+\bibitem{Zhang2000}
+W.~Zhang, ``{Linux virtual server for scalable network services},'' Ottawa
+  Linux Symposium, 2000.
+
+\bibitem{K8sIngress2017}
+T.K. Authors, ``Ingress resources | kubernetes,'' 2017.
+
+\bibitem{moy1997ospf}
+J.~Moy, ``Ospf version 2,'' 1997.
+
+\bibitem{K8sFederation2017}
+T.K. Authors, ``Federation,'' 2017.
+
+\bibitem{Pleshakov2016}
+M.~Pleshakov, ``Nginx and nginx plus ingress controllers for kubernetes load
+  balancing,'' Dec.\ 2016.
+
+\bibitem{NginxInc2016}
+N.~Inc., ``Nginx ingress controller,'' 2017.
+
+\bibitem{Prashanth2016}
+B.D. Prashanth~B, Mike~Danese, ``kube-keepalived-vip,'' 2016.
+
+\bibitem{ACassen2016}
+A.~Cassen, ``Keepalived for linux.''
+
+\bibitem{DockerCoreEngineering2016}
+D.C. Engineering, ``Docker 1.12: Now with built-in orchestration! - docker
+  blog,'' 2016.
+
+\bibitem{DockerInc2017}
+{Docker Inc}, ``{Use swarm mode routing mesh | Docker Documentation},'' 2017.
+
+\bibitem{Sibiryov2015}
+A.~Sibiryov, ``Gorb go routing and balancing,'' 2015.
+
+\bibitem{Aaltodoc:http://urn.fi/URN:NBN:fi:aalto-201611025433}
+T.~Marttila, ``Design and implementation of the clusterf load balancer for
+  docker clusters,'' master's thesis, aalto university, 2016-10-27.
+
+\bibitem{CoreOSEtcd}
+I.~CoreOS, ``{etcd | etcd Cluster by CoreOS}.''
+
+\bibitem{HashiCorpConsul}
+HashiCorp, ``{Consul by HashiCorp}.''
+
+\bibitem{eisenbud2016maglev}
+D.E. Eisenbud, C.~Yi, C.~Contavalli, C.~Smith, R.~Kononov, E.~Mann-Hielscher,
+  A.~Cilingiroglu, B.~Cheyney, W.~Shang, and J.D. Hosein, ``Maglev: A fast and
+  reliable software network load balancer.,'' NSDI, pp.523--535, 2016.
+
+\bibitem{Voellm2013}
+A.F. Voellm, ``Compute engine load balancing hits 1 million requests per
+  second!.''
+
+\bibitem{patel2013ananta}
+P.~Patel, D.~Bansal, L.~Yuan, A.~Murthy, A.~Greenberg, D.A. Maltz, R.~Kern,
+  H.~Kumar, M.~Zikos, H.~Wu, {\em et~al.}, ``Ananta: Cloud scale load
+  balancing,'' ACM SIGCOMM Computer Communication Review, vol.43, no.4,
+  pp.207--218, 2013.
+
+\bibitem{coreos_2018}
+Coreos, ``coreos/flannel,'' Jul\ 2018.
+
+\bibitem{project_calico}
+``Secure networking for the cloud native era,'' 2018.
+
+\bibitem{ktaka_ccmp_2017_826894}
+ktaka ccmp, ``ktaka-ccmp/ipvs-ingress: Initial release,'' July\ 2017.
+
+\end{thebibliography}
