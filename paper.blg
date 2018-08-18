@@ -29,6 +29,7 @@ Warning--entry type for "Voellm2013" isn't style-file defined
 --line 560 of file bibliography.bib
 Warning--entry type for "project_calico" isn't style-file defined
 --line 585 of file bibliography.bib
+Warning--I didn't find a database entry for ""
 Warning--to sort, need author or key in project_calico
 Warning--empty journal in moy1997ospf
 Warning--empty school in Aaltodoc:http://urn.fi/URN:NBN:fi:aalto-201611025433
@@ -73,4 +74,4 @@ warning$ -- 3
 while$ -- 55
 width$ -- 26
 write$ -- 177
-(There were 16 warnings)
+(There were 17 warnings)
