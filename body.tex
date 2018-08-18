@@ -62,7 +62,7 @@ because standard Layer 2 rendandacy protocols, e.g. Virtual Router Redundancy Pr
 can not be used in many cases.
 Further more, providing uniform methods independent of various cloud environments and on-premise datacenter is much more difficult.   
 
-In this paper, we propose a software load balancer with ECMP redundancy for container cluster environment without a cloud load balancer.
+In this paper, we propose a software load balancer with Equal Cost Multi-Path(ECMP)\cite{} redundancy for container cluster environment without a cloud load balancer.
 We containerize an open source BGP software, exabgp\cite{}, and launch it with containerized Linux kernels IPVS load balancer in a single pod using Kubernetes.
 We set up a redundant load balancer cluster using such pods and evaluate its functionality.  
 We also measure preliminary performance of such a load balancer cluster.
@@ -235,7 +235,7 @@ When a container communicates with the router that has no knowledge of the overl
 
 \subsubsection{Redundancy with ECMP}
 
-The Equal Cost Multi-Path(ECMP) is a functionality a router may support, where the router has multiple next hops with equal cost(priority) to a destination, and generally distribute the traffic depending on the hash of the flow 5 tuples(source IP, destination IP, source port, destination port, protocol).
+The ECMP is a functionality a router may support, where the router has multiple next hops with equal cost(priority) to a destination, and generally distribute the traffic depending on the hash of the flow 5 tuples(source IP, destination IP, source port, destination port, protocol).
 The multiple next hops and their cost are often populated using the Border Gateway Protocol(BGP) protocol.
 
 \begin{figure}[tb]
@@ -295,6 +295,11 @@ This means that a single software load balancer limits the overall performance o
 
 \section{Implementation}\label{Implementation}
 
+Here we discuss the implementation of our proposed load balancers.
+
+\subsection{Proof of concept system architecture}
+
+
 \subsection{IPVS containerization}
 
 \begin{figure}
@@ -331,21 +336,11 @@ For the former case, we also needed to mount the \enquote{/lib/module} of the no
 \subsection{BGP software containerization}
 
 
-
-
-\subsection{Proof of concept system architecture}
-
-
 \section{Evaluation}\label{Evaluation}
 
-\subsection{Functionality}\label{Functionality}
+\subsection{Redundancy}\label{Redundancy}
 
-\subsubsection{Redundancy}
-
-\subsubsection{Load balancing}
-
-\subsection{Performance}\label{Performance}
-
+\subsection{Scalability}\label{Scalability}
 
 
 \section{Conclusions}\label{Conclusions}
@@ -372,4 +367,10 @@ We leave the following for the future work:
 2) Implementation of consistent hashing balancing algorithm
 3) Containerization of XDP load balancer
 These works are ongoing and will be presented when they are available.
+
+BGP peering with the Route Reflector is one way of providing a uniform environment for web service container clusters.
+While providing a software load balancer that can be controlled through API is another way.
+For the former, corporation by the cloud provider so that users can use BGP peering with the upstream router is essential.
+In case such a corporation cannot be made, the latter is also worth investigating.
+
 
