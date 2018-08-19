@@ -23,8 +23,18 @@ W.~Zhang, ``{Linux virtual server for scalable network services},'' Ottawa
 \bibitem{K8sIngress2017}
 T.K. Authors, ``Ingress resources | kubernetes,'' 2017.
 
+\bibitem{hinden2004virtual}
+R.~Hinden, ``Virtual router redundancy protocol (vrrp),'' 2004.
+
 \bibitem{moy1997ospf}
 J.~Moy, ``Ospf version 2,'' 1997.
+
+\bibitem{thaler2000multipath}
+D.~Thaler and C.~Hopps, ``Multipath issues in unicast and multicast next-hop
+  selection,'' tech. rep., 2000.
+
+\bibitem{exa-networks_2018}
+Exa-Networks, ``Exa-networks/exabgp,'' Jul\ 2018.
 
 \bibitem{K8sFederation2017}
 T.K. Authors, ``Federation,'' 2017.
