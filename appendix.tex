@@ -1,0 +1,104 @@
+
+\appendix
+\section{Example of exabgp on the bgp advertiser container.}
+\label{appendix:exabgp_config}
+
+\begin{verbatim}
+neighbor 10.0.0.108 {
+ description "peer1";
+ router-id 172.16.20.2;
+ local-address 172.16.20.2;
+ local-as 65021;
+ peer-as 65021;
+ hold-time 1800;
+   static {
+     route 10.1.1.0/24 next-hop 10.0.0.106;
+   }
+}
+\end{verbatim}
+
+\section{Example of gobgpd config on the route reflector.}
+\label{appendix:gobgpd_config_router}
+
+\begin{verbatim}
+global:
+  config:
+    as: 65021
+    router-id: 10.0.0.109
+    local-address-list:
+    - 0.0.0.0 # ipv4 only
+  use-multiple-paths:
+    config:
+      enabled: true
+
+peer-groups:
+  - config:
+      peer-group-name: k8s
+      peer-as: 65021
+    afi-safis:
+      - config:
+          afi-safi-name: ipv4-unicast
+
+dynamic-neighbors:
+  - config:
+      prefix: 172.16.0.0/16
+      peer-group: k8s
+
+neighbors:
+  - config:
+      neighbor-address: 10.0.0.110
+      peer-as: 65021
+    route-reflector:
+      config:
+        route-reflector-client: true
+        route-reflector-cluster-id: 10.0.0.109
+    add-paths: 
+      config:
+        send-max: 255
+        receive: true
+
+\end{verbatim}
+
+\section{Example of gobgpd config on the router.}
+
+\begin{verbatim}
+global:
+  config:
+    as: 65021
+    router-id: 10.0.0.110
+    local-address-list:
+    - 0.0.0.0
+
+  use-multiple-paths:
+    config:
+      enabled: true
+
+neighbors:
+    - config:
+        neighbor-address: 10.0.0.109
+        peer-as: 65021
+      add-paths:
+        config:
+          receive: true
+
+zebra:
+  config:
+    enabled: true
+    url: unix:/run/quagga/zserv.api
+    version: 3
+    redistribute-route-type-list: 
+      - static
+
+\end{verbatim}
+\label{appendix:router_config}
+
+
+\begin{verbatim}
+hostname Router
+log file /var/log/zebra.log
+\end{verbatim}
+
+%\caption{Example of zebra config on the router.}
+%\label{fig:zebra_config_router}
+
+
