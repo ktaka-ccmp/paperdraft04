@@ -1,7 +1,11 @@
 \begin{summary}
-IEICE (The Institute of Electronics, Information and Communication Engineers) 
-provides a \LaTeXe\ class file, named 
-for the IEICE Transactions. This document describes how to use 
-the class file, and also makes some remarks about typesetting 
-a manuscript by using the \LaTeXe. The design is based on \LaTeXe.
+Linux container technology and clusters of the containers are expected to make web services that consist of multiple web servers and a load balancer portable, and thus realize easy migration of web services.
+This prevents a service to be locked-in a single cloud provider or single location.
+However existing container management systems lack the generic implementation to route the traffic from the internet into the web service consisting of container clusters.
+For example, Kubernetes, which is one of the most popular container management system, is heavily dependent on cloud load balancers and if users use unsupported cloud providers or on-premise datacenters, it is up to users to route the traffic into their cluster while keeping the redanduncy and scailability.
+This means that users could easily be locked-in the major cloud providers including GCP, AWS and Azure.
+In this paper we propose an architecture with a group of containerized load balancers and ECMP redundancy for Kubernets.
+We containerize Linux IPVS and exabgp, and implement experimental system using standard Linux boxes and open source softwares.
+We also reveal that our proposed system function as we intended.
+Our proposed load balancers are usable even if a infrastructure does not have supported load balancers by Kubernetes and thus free users from lock-ins.
 \end{summary}
