@@ -1,4 +1,4 @@
-This is BibTeX, Version 0.99d (TeX Live 2016/Debian)
+This is BibTeX, Version 0.99d (TeX Live 2017)
 Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: paper.aux
 The style file: ieicetr.bst
@@ -30,50 +30,51 @@ Warning--entry type for "Voellm2013" isn't style-file defined
 Warning--entry type for "project_calico" isn't style-file defined
 --line 585 of file bibliography.bib
 Warning--to sort, need author or key in project_calico
+Warning--to sort, need author or key in ip-sysctl
 Warning--empty journal in hinden2004virtual
 Warning--empty journal in moy1997ospf
 Warning--empty institution in thaler2000multipath
 Warning--empty school in Aaltodoc:http://urn.fi/URN:NBN:fi:aalto-201611025433
 Warning--empty institution in walton2016advertisement
-You've used 28 entries,
+You've used 30 entries,
             2213 wiz_defined-function locations,
-            917 strings with 12438 characters,
-and the built_in function-call counts, 6940 in all, are:
-= -- 667
-> -- 336
+            923 strings with 12520 characters,
+and the built_in function-call counts, 7278 in all, are:
+= -- 698
+> -- 344
 < -- 0
-+ -- 139
-- -- 110
-* -- 431
-:= -- 1153
++ -- 143
+- -- 112
+* -- 446
+:= -- 1198
 add.period$ -- 24
-call.type$ -- 28
-change.case$ -- 141
+call.type$ -- 30
+change.case$ -- 148
 chr.to.int$ -- 0
-cite$ -- 34
-duplicate$ -- 234
-empty$ -- 605
-format.name$ -- 110
-if$ -- 1496
+cite$ -- 37
+duplicate$ -- 246
+empty$ -- 648
+format.name$ -- 112
+if$ -- 1576
 int.to.chr$ -- 0
-int.to.str$ -- 28
+int.to.str$ -- 30
 missing$ -- 7
-newline$ -- 87
-num.names$ -- 54
-pop$ -- 219
+newline$ -- 93
+num.names$ -- 56
+pop$ -- 233
 preamble$ -- 1
-purify$ -- 110
+purify$ -- 115
 quote$ -- 0
-skip$ -- 247
+skip$ -- 268
 stack$ -- 0
-substring$ -- 237
+substring$ -- 247
 swap$ -- 24
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 112
-warning$ -- 6
-while$ -- 63
-width$ -- 30
-write$ -- 207
-(There were 19 warnings)
+type$ -- 120
+warning$ -- 7
+while$ -- 65
+width$ -- 32
+write$ -- 218
+(There were 20 warnings)

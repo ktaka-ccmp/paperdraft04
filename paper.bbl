@@ -93,9 +93,15 @@ Coreos, ``coreos/flannel,'' Jul\ 2018.
 \bibitem{project_calico}
 ``Secure networking for the cloud native era,'' 2018.
 
+\bibitem{ip-sysctl}
+``ip-sysctl.txt.''
+
 \bibitem{walton2016advertisement}
 D.~Walton, A.~Retana, E.~Chen, and J.~Scudder, ``Advertisement of multiple
   paths in bgp,'' tech. rep., 2016.
+
+\bibitem{osrg_gobgp_zebra}
+Osrg, ``osrg/gobgp.''
 
 \bibitem{ktaka_ccmp_2017_826894}
 ktaka ccmp, ``ktaka-ccmp/ipvs-ingress: Initial release,'' July\ 2017.
