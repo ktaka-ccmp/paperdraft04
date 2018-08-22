@@ -441,34 +441,62 @@ A configuration of exabgp is shown in \ref{appendix:exabgp_config}.
 
 \section{Evaluation}\label{Evaluation}
 
+We examined the basic performance of the our proposed load balancer container and the basic function of the ECMP redundancy.
+As for the performance, we measured throught of the load balancer container and found that it was at least as good as existing software load balancer using Linux. The portability of the load balancer is obvious as we made it runnable as the container usig Kubernetes.  
+The ECMP redundancy is examined by watching routing table updates on the router when the new load balancer is add or removed. 
+We also demonstrate two diffrent service with different number of load balancers can share the group of nodes.
 
-The router routing table properly populated.
+\subsection{Load balancer performance}
 
-\begin{verbatim}
-root@v110.hana:~# ip route show
-default via 10.0.0.254 dev eth0 onlink
-10.0.0.0/24 dev eth0 proto kernel scope link src 10.0.0.110
+Fig.~\ref{fig:ipvs-iptables-nginx} shows the throughput of the proposed IPVS load balancer in a container.
+The throughput is measured by sending out http requests from a benchmark program called wrk\cite{Glozer2016} on a benchmark host towards the load balancer pod and counting the number of responses the benchmark host recieved in a second.
+Also shown are the nginx as the load balancer and the iptables DNAT as the Round Robin load balancer as references. 
+As we increased the number of the web server conianers from 1 to around 14 the peformance of the IPVS pod increased almost linierly and after which it saturated. 
+The increase is considered as the evidence of the benefit of placing a load balancer in front of web servers and let the web servers share the load.
+The saturated peformance level indicated the maximum peformance of the cluster consisting of one load balancer and multiple web server pods.
+In this particular experiment it turned out the band width of the 1 Gbps bandwidth of network used in the expriment\cite{takahashi2018portable}.
+While nginx did not show any benefit as the load balancer, the peformance of the IPVS load balancer container showed equivalent performance level as the iptables DNAT load balancing in the node net namespace. 
+This means that our proposed portable load balancer container is as good as the uncontainerized iptables' load balancing to the extent of the 1 Gbps network speed. 
+
+\begin{figure}
+\includegraphics[width=\columnwidth]{Figs/ipvs-iptables-nginx}
+\caption{Performance of the load balancer container.}
+\label{fig:ipvs-iptables-nginx}
+\end{figure}
+
+\subsection{ECMP route population}
+
+The ECMP redundancy is expected to give us the load balancer redundancy and scalability since all the load balancer containers act as active.
+In this subsection we evaluated behavior of the ECMP routing table updates, which is equivalnt realizing redundancy. 
+
+The Listing~\ref{single_lb} shows the routing table entry on the router when single load balancer pod exists.
+From this line we can understands that packets toward 10.1.1.0/24 are forwarded to 10.0.0.106 where the load balancer pod is running.
+It also shows that this routing rule is controled by zebra.
+
+\begin{lstlisting}[language=bash,caption=Routing table entry with single load balancer pod.,label=single_lb]
 10.1.1.0/24 via 10.0.0.106 dev eth0 proto zebra metric 20
-\end{verbatim}
+\end{lstlisting}
 
-\begin{verbatim}
-root@v110.hana:~# ip route show
-default via 10.0.0.254 dev eth0 onlink
-10.0.0.0/24 dev eth0 proto kernel scope link src 10.0.0.110
+When the number of the load balancer pods is incrased to three, we can see the routing table entry as the Listing~\ref{three_lb}.
+We have three next hops towards 10.1.1.0/24 each of which beeing the node where the load balancer pods are running.
+The weights of the three nexthops are all 1.   
+
+\begin{lstlisting}[language=bash,caption=Routing table entry with three load balancer pods.,label=three_lb]
 10.1.1.0/24 proto zebra metric 20
         nexthop via 10.0.0.105  dev eth0 weight 1
         nexthop via 10.0.0.106  dev eth0 weight 1
         nexthop via 10.0.0.107  dev eth0 weight 1
-\end{verbatim}
+\end{lstlisting}
 
-The ECMP is functioning .... packets are arriving for both load balancers.
+%{\bf The ECMP is functioning .... packets are arriving for both load balancers.
+%W need evidence of pakets arriving all pods.. }
 
-evidence....
+The Listing~\ref{double_services} shows the case where we started new service with two load balancer pods with service addresses in 10.1.2.0/24 range.
+We could accomodate two diffrent services toward different IP addresses, one with three load balancers and the other with two load balancers on a group of nodes(10.0.0,105,10.0.0,106,10.0.0,107). 
+Again, the population of the routing entry was almost instant as we started the load balancers for the second service.
 
-\begin{verbatim}
-root@v110.hana:~# ip route show
-default via 10.0.0.254 dev eth0 onlink
-10.0.0.0/24 dev eth0 proto kernel scope link src 10.0.0.110
+
+\begin{lstlisting}[language=bash,caption=Routing table entry with additional service with two load balancer pods started.,label=double_services]
 10.1.1.0/24 proto zebra metric 20
         nexthop via 10.0.0.107  dev eth0 weight 1
         nexthop via 10.0.0.105  dev eth0 weight 1
@@ -476,13 +504,40 @@ default via 10.0.0.254 dev eth0 onlink
 10.1.2.0/24 proto zebra metric 20
         nexthop via 10.0.0.107  dev eth0 weight 1
         nexthop via 10.0.0.106  dev eth0 weight 1
-\end{verbatim}
+\end{lstlisting}
 
 
 
 \section{Conclusions}\label{Conclusions}
 
-In this paper, we proposed a portable software load balancer that has the following features, 1) runnable as a Linux container, 2) redundancy with ECMP technique,  for the container cluster systems.
+
+In this paper, we proposed a portable load balancer for the Kubernetes cluster systems 
+that is aimed at facilitating migration of container clusters for web services.
+We implemented a containerized software load balancer that is run by Kubernetes as a part of container cluster, 
+using Linux kernel's IPVS, as a proof of concept.
+We also proposed ECMP redundacy architecture for our portable load balancers. 
+In order to discuss the feasibility of the proposed portable load balancer with ECMP redundancy, we built 
+a system with multiple web severs and  the load balancer container using  Kubernetes cluster management system and conducted performance measurements.
+Our experimental results indicate that the IPVS based load balancer in container improves the portability of 
+the Kubernetes cluster system while it shows the similar performance levels as the existing iptables DNAT based load balancer.
+We also implemented ECMP redundancy using group of load balancer pods and examined basic functionality. 
+Our experimental system consists of standard Linux boxes and OSSs, which was good for testing out latest technology for our proposed ECMP redundancy architecture. 
+We could success fullybuild the experimental system that function as our proposed achitecture should.
+  
+
+We also clarified that choosing the right operating modes of overlay networks is important for the performance of load balancers. 
+For example, in the case of flannel, only the vxlan and udp backend operation modes could be used 
+in the cloud environment, and the udp backend significantly degraded their performance.
+Furthermore, we also learned that the distribution of packet processing among multiple CPUs was very important
+to obtain the maximum performance levels from load balancers.
+
+In this paper we porposed portable load balancer architecture with ECMP redundancy.
+To realize the portability we containerized IPVS and made it work in the Kubernetes.
+We implemented experimental system to prove that such arhichtecture works using standard Linux boxes and OSS.
+
+
+
+In this paper, we proposed a portable software load balancer that has the following features, 1) runnable as a Linux container, 2) redundancy with ECMP technique, for the container cluster systems.
 
 Our load balancer aims at facilitating migration of container clusters for web services.
 We implemented a containerized software load balancer that is run by Kubernetes as a part of container cluster,

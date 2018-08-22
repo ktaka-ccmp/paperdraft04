@@ -18,6 +18,26 @@
 %%%%% by ktaka
 \usepackage{csquotes}
 
+\usepackage{listings}
+\lstset{
+  basicstyle=\small\rmfamily, 
+  breakatwhitespace=false, 
+  breaklines=true,  
+  captionpos=b,
+  frame=tb,
+  basewidth = {.52em}
+}
+
+
+\usepackage{caption}
+%\DeclareCaptionFormat{listing}{\colorbox{white}{\parbox{\dimexpr\linewidth-2\fboxsep\relax}{#1#2#3}}}
+%\captionsetup[lstlisting]{format=listing,labelfont=gray,textfont=gray}
+\DeclareCaptionFormat{listing}{\colorbox{white}{\parbox{\dimexpr\linewidth-2\fboxsep\relax}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing}
+
+
+\usepackage{fancyvrb}
+
 \setcounter{page}{1}
 %\breakauthorline{}% breaks lines after the n-th author
 

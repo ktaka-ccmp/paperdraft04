@@ -1,8 +1,9 @@
 
 \appendix
-\section{Example of exabgp on the bgp advertiser container.}
+\section{Exabgp configuration on the load balancer container.}
 \label{appendix:exabgp_config}
 
+{\bf\normalsize exabgp.conf:}
 \begin{verbatim}
 neighbor 10.0.0.108 {
  description "peer1";
@@ -17,9 +18,10 @@ neighbor 10.0.0.108 {
 }
 \end{verbatim}
 
-\section{Example of gobgpd config on the route reflector.}
+\section{Gobgpd configuration on the route reflector.}
 \label{appendix:route_reflector_config}
 
+{\bf\normalsize gobgp.conf:}
 \begin{verbatim}
 global:
   config:
@@ -59,8 +61,9 @@ neighbors:
 
 \end{verbatim}
 
-\section{Example of gobgpd config on the router.}
+\section{Gobgpd and zebra configurations on the router.}
 
+{\bf\normalsize gobgp.conf:}
 \begin{verbatim}
 global:
   config:
@@ -91,8 +94,8 @@ zebra:
 
 \end{verbatim}
 \label{appendix:router_config}
-
-
+%
+{\bf\normalsize zebra.conf:}
 \begin{verbatim}
 hostname Router
 log file /var/log/zebra.log

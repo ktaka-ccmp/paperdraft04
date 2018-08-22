@@ -25,6 +25,8 @@ Warning--entry type for "DockerCoreEngineering2016" isn't style-file defined
 --line 335 of file bibliography.bib
 Warning--string name "june" is undefined
 --line 341 of file bibliography.bib
+Warning--entry type for "Glozer2016" isn't style-file defined
+--line 405 of file bibliography.bib
 Warning--entry type for "Voellm2013" isn't style-file defined
 --line 560 of file bibliography.bib
 Warning--entry type for "project_calico" isn't style-file defined
@@ -36,45 +38,45 @@ Warning--empty journal in moy1997ospf
 Warning--empty institution in thaler2000multipath
 Warning--empty school in Aaltodoc:http://urn.fi/URN:NBN:fi:aalto-201611025433
 Warning--empty institution in walton2016advertisement
-You've used 30 entries,
+You've used 31 entries,
             2213 wiz_defined-function locations,
-            923 strings with 12520 characters,
-and the built_in function-call counts, 7278 in all, are:
-= -- 698
-> -- 344
+            928 strings with 12585 characters,
+and the built_in function-call counts, 7474 in all, are:
+= -- 717
+> -- 351
 < -- 0
-+ -- 143
-- -- 112
-* -- 446
-:= -- 1198
-add.period$ -- 24
-call.type$ -- 30
-change.case$ -- 148
++ -- 146
+- -- 114
+* -- 455
+:= -- 1230
+add.period$ -- 25
+call.type$ -- 31
+change.case$ -- 152
 chr.to.int$ -- 0
-cite$ -- 37
-duplicate$ -- 246
-empty$ -- 648
-format.name$ -- 112
-if$ -- 1576
+cite$ -- 38
+duplicate$ -- 252
+empty$ -- 669
+format.name$ -- 114
+if$ -- 1620
 int.to.chr$ -- 0
-int.to.str$ -- 30
+int.to.str$ -- 31
 missing$ -- 7
-newline$ -- 93
-num.names$ -- 56
-pop$ -- 233
+newline$ -- 96
+num.names$ -- 58
+pop$ -- 241
 preamble$ -- 1
-purify$ -- 115
+purify$ -- 118
 quote$ -- 0
-skip$ -- 268
+skip$ -- 276
 stack$ -- 0
-substring$ -- 247
+substring$ -- 252
 swap$ -- 24
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 120
+type$ -- 124
 warning$ -- 7
-while$ -- 65
-width$ -- 32
-write$ -- 218
-(There were 20 warnings)
+while$ -- 67
+width$ -- 33
+write$ -- 225
+(There were 21 warnings)

@@ -106,4 +106,7 @@ Osrg, ``osrg/gobgp.''
 \bibitem{ktaka_ccmp_2017_826894}
 ktaka ccmp, ``ktaka-ccmp/ipvs-ingress: Initial release,'' July\ 2017.
 
+\bibitem{Glozer2016}
+W.~Glozer, ``wrk - a http benchmarking tool,'' 2012.
+
 \end{thebibliography}
