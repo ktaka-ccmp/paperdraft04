@@ -93,6 +93,10 @@ Coreos, ``coreos/flannel,'' Jul\ 2018.
 \bibitem{project_calico}
 ``Secure networking for the cloud native era,'' 2018.
 
+\bibitem{rfc4456}
+E.C. T.~Bates and R.~Chandra, ``{BGP Route Reflection: An Alternative to Full
+  Mesh Internal BGP (IBGP)},'' {RFC} 4456, {RFC Editor}, April\ 2006.
+
 \bibitem{ip-sysctl}
 ``ip-sysctl.txt.''
 

@@ -32,51 +32,55 @@ Warning--entry type for "Voellm2013" isn't style-file defined
 Warning--entry type for "project_calico" isn't style-file defined
 --line 585 of file bibliography.bib
 Warning--to sort, need author or key in project_calico
+Name 1 in "T. Bates, E. Chen, and R. Chandra" has a comma at the end for entry rfc4456
+while executing---line 1083 of file ieicetr.bst
 Warning--to sort, need author or key in ip-sysctl
 Warning--empty journal in hinden2004virtual
 Warning--empty journal in moy1997ospf
 Warning--empty institution in thaler2000multipath
 Warning--empty school in Aaltodoc:http://urn.fi/URN:NBN:fi:aalto-201611025433
+Name 1 in "T. Bates, E. Chen, and R. Chandra" has a comma at the end for entry rfc4456
+while executing---line 1124 of file ieicetr.bst
 Warning--empty institution in walton2016advertisement
-You've used 31 entries,
+You've used 32 entries,
             2213 wiz_defined-function locations,
-            928 strings with 12585 characters,
-and the built_in function-call counts, 7474 in all, are:
-= -- 717
-> -- 351
-< -- 0
-+ -- 146
-- -- 114
-* -- 455
-:= -- 1230
-add.period$ -- 25
-call.type$ -- 31
-change.case$ -- 152
+            937 strings with 12755 characters,
+and the built_in function-call counts, 7710 in all, are:
+= -- 741
+> -- 364
+< -- 1
++ -- 151
+- -- 118
+* -- 474
+:= -- 1274
+add.period$ -- 26
+call.type$ -- 32
+change.case$ -- 157
 chr.to.int$ -- 0
-cite$ -- 38
-duplicate$ -- 252
-empty$ -- 669
-format.name$ -- 114
-if$ -- 1620
+cite$ -- 39
+duplicate$ -- 261
+empty$ -- 684
+format.name$ -- 118
+if$ -- 1667
 int.to.chr$ -- 0
-int.to.str$ -- 31
+int.to.str$ -- 32
 missing$ -- 7
-newline$ -- 96
-num.names$ -- 58
-pop$ -- 241
+newline$ -- 99
+num.names$ -- 60
+pop$ -- 245
 preamble$ -- 1
-purify$ -- 118
+purify$ -- 122
 quote$ -- 0
-skip$ -- 276
+skip$ -- 282
 stack$ -- 0
-substring$ -- 252
-swap$ -- 24
-text.length$ -- 0
+substring$ -- 257
+swap$ -- 25
+text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 124
+type$ -- 128
 warning$ -- 7
-while$ -- 67
-width$ -- 33
-write$ -- 225
-(There were 21 warnings)
+while$ -- 69
+width$ -- 34
+write$ -- 234
+(There were 2 error messages)
