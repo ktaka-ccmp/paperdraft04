@@ -70,15 +70,12 @@ The contributions of this paper are as follows:
 2) We demonstrate the basic functionality, i.e., redundancy and scalability of the proposed load balancers.
 Proving that it is possible to design and implement a scalable web service using OSS tools will benefit users who want to migrate their web service to outside of the major cloud providers.
 
-[!!!Rewrite this part -begin-]
 The rest of the paper is organized as follows.
-Section \ref{Related Work} highlights work that deals specifically with container cluster migration,
+Section \ref{Related Work} highlights related work that deals specifically with container cluster migration,
 software load balancer containerization, and load balancer related tools within the context of the container technology.
-Section \ref{Proposed Architecture} will explain existing architecture problems and propose our solutions.
-In Section \ref{Implementation}, experimental conditions and the parameters
-that we considered to be important in our experiment will be described in detail.
-Then, we will our experimental results and discuss the obtained performance characteristics in Section~\ref{Evaluation}, which is followed by a summary of our work in Section~\ref{Conclusions}.
-[!!!Rewrite this part -end-]
+Section \ref{Proposed Architecture} discusses problems of the existing architecture and proposes our solutions.
+In Section \ref{Implementation}, explain experimental system in detail.
+Then, we show our experimental results and discuss obtained characteristics in Section~\ref{Evaluation}, which is followed by a summary of our work in Section~\ref{Conclusions}.
 
 \section{Related Work}\label{Related Work}
 
@@ -364,7 +361,7 @@ The exabgp container is responsible for advertising the route toward the IP addr
 The route reflector aggregates the routing information advertised by load balancer pods and advertise them to the upstream router.
 
 The exabgp is used in the load balancer pods because of the simplicity in setting as static route advertiser.
-On the other hand, gobgp is used in the router and the route reflector, because exabgp did not seem to support add-path\cite{walton2016advertisement} needed for multi-path advertisement and Forwarding Information Base(FIB) manipulation\cite{exa-networks_2018}.
+On the other hand, gobgp is used in the router and the route reflector, because exabgp did not seem to support add-path\cite{rfc7911} needed for multi-path advertisement and Forwarding Information Base(FIB) manipulation\cite{exa-networks_2018}.
 The gobgp supports the add-path, and the FIB manipulation through zebra\cite{osrg_gobgp_zebra}.
 The configurations for the router is summarised in \ref{appendix:router_config}.
 
