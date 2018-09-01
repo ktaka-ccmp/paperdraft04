@@ -28,6 +28,8 @@
   basewidth = {.52em}
 }
 
+\usepackage[hyphens]{url}
+%\usepackage{hyperref}
 
 \usepackage{caption}
 %\DeclareCaptionFormat{listing}{\colorbox{white}{\parbox{\dimexpr\linewidth-2\fboxsep\relax}{#1#2#3}}}
@@ -49,28 +51,26 @@
 %\title[title for header]{title}
 %\titlenote{}
 \authorlist{%
- \authorentry{Kimitoshi Takahashi}{n}{ktaka}
- \authorentry{Kento Aida}{m}{aida}\MembershipNumber{1111111}
- \authorentry{Tomoya Tanjo}{n}{tanjo}
- \authorentry{Jingtao Sun}{n}{sun}
- \authorentry{Kazushige Saga}{n}{saga}
+ \authorentry{Kimitoshi Takahashi}{n}{sokendai,ccmp}
+ \authorentry{Kento Aida}{m}{nii,sokendai}\MembershipNumber{1111111}
+ \authorentry{Tomoya Tanjo}{n}{nii}
+ \authorentry{Jingtao Sun}{n}{nii}
+ \authorentry{Kazushige Saga}{m}{nii}
 % \authorentry{name}{membership}{affiliate label}\MembershipNumber{}
 % \authorentry{name}{membership}{affiliate label}[present affiliate label]\MembershipNumber{}
 % \authorentry[e-mail address]{name}{membership}{affiliate label}\MembershipNumber{}
 % \authorentry[e-mail address]{name}{membership}{affiliate label}[present affiliate label]\MembershipNumber{}
 }
-\affiliate[ktaka]{The author is with the 
+\affiliate[sokendai]{The author is with the 
 \EICdepartment{School of Multidisciplinary Sciences, Dept.\ of Informatics}
-\EICorganization{The Graduate University for Advanced Studies and Cluster Computing Inc.}
+\EICorganization{The Graduate University for Advanced Studies}
 \EICaddress{Chiyoda-ku, Tokyo, Japan}
 }
-\affiliate[aida]{The author is with the 
-%\EICdepartment{ }
-\EICorganization{National Institute of Infomatics and The Graduate University for Advanced Studies}
+\affiliate[ccmp]{The author is with the 
+\EICorganization{Cluster Computing Inc.}
 \EICaddress{Chiyoda-ku, Tokyo, Japan}
 }
-\affiliate[tanjo,sun,saga]{The author is with the 
-%\EICdepartment{ }
+\affiliate[nii]{The author is with the 
 \EICorganization{National Institute of Infomatics}
 \EICaddress{Chiyoda-ku, Tokyo, Japan}
 }
@@ -95,8 +95,8 @@ redundancy, ECMP, load balancer, container, BGP
 
 \input{body}
 
-\bibliographystyle{ieicetr}% bib style
-\bibliography{bibliography}% your bib database
+%\bibliographystyle{ieicetr}% bib style
+%\bibliography{bibliography}% your bib database
 
 %\begin{thebibliography}{99}% more than 9 --> 99 / less than 10 --> 9
 %\bibitem{}
@@ -104,6 +104,8 @@ redundancy, ECMP, load balancer, container, BGP
 
 %\profile{}{}
 %\profile*{}{}% without picture of author's face
+
+\input{citation}
 
 \input{profile}
 
