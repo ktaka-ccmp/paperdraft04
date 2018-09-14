@@ -14,7 +14,7 @@ cost performance improvements, legal compliance, and shortening the geographical
 are the main concerns for web service providers in e-commerce, gaming, Financial technology(Fintech) and Internet of Things(IoT) field.
 %
 
-Kubernetes\cite{K8s2017}, which is one of the popular container cluster management systems, 
+Kubernetes\cite{K8s2017}, which is one of the most popular container cluster management systems, 
 enables easy deployment of container clusters.
 Since Kubernetes hides the differences in the base environments, users can easily deploy a web service on different 
 cloud providers or on on-premise data centers, without adjusting the container cluster configurations to the new environment. 
@@ -54,21 +54,20 @@ iptables DNAT load balancer and the Nginx Layer 7 load balancing.
 %
 The results indicated that the proposed load balancer could improve the portability of container clusters without performance degradation compared with the existing load balancer.
 
-However, redundancy of the load balancer has not been discussed in our previous work, while the redundancy is needed to improve the availability of services.%
+However, redundancy of the load balancer has not been discussed in our previous work, despite the fact that the redundancy is always needed to improve the availability of services in modern systems.
 Routing traffic to one of the load balancers while keeping redundancy in the container environment is a complex issue
 because standard Layer 2 redundancy protocols, e.g., Virtual Router Redundancy Protocol(VRRP)\cite{hinden2004virtual}
-or OSPF\cite{moy1997ospf}, which uses multicast, cannot be used in many cases.
+or OSPF\cite{moy1997ospf}, which uses multicast, cannot be used in many network environments.
 Furthermore, providing uniform methods independent of the infrastructures such as various cloud environments and the on-premise data center is much more difficult.
 
-In this paper, we extend the previous work and propose a software load balancer with Equal Cost Multi-Path(ECMP)\cite{thaler2000multipath} redundancy for container cluster environment where a cloud load balancer compatible with Kubernetes does not exist.
-We containerize an open source BGP software, exabgp\cite{exa-networks_2018}, and launch it with containerized Linux kernels ipvs load balancer as a single pod using Kubernetes.
-We set up a redundant load balancer cluster using the pods, and evaluate the functionality and preliminary performance.
+In this paper, we extend the previous work and propose a software load balancer with Equal Cost Multi-Path(ECMP)\cite{thaler2000multipath} redundancy for container cluster environment that does not have a cloud load balancer compatible with Kubernetes.
+We containerize an open source BGP software, exabgp\cite{exa-networks_2018}, and also containerize Linux kernel's ipvs load balancer. Then we launch them as a single pod, which is a group of containers that share a single net namespace using Kubernetes.
+We form a cluster of such pods and evaluate the functionality and preliminary performance.
 
 The contributions of this paper are as follows:
-1) We propose a portable software load balancer with ECMP redundancy for container cluster environments without cloud load balancers.
-2) We implement the proposed a load balancer using existing Open Source Software(OSS).
-2) We demonstrate the basic functionality, i.e., redundancy and scalability of the proposed load balancers.
-Proving that it is possible to design and implement a scalable web service using OSS tools will benefit users who want to migrate their web service to outside of the major cloud providers.
+Although there have been studies regarding redundant software load balancers especially from the major cloud providers\cite{eisenbud2016maglev,patel2013ananta}, their load balancers are only usable within their respective cloud infrastructures.
+This paper aims to provide a redundant software load balancer architecture that is usable on many cloud providers and on-premise datacenters.
+Since proposed load balancer architecture uses nothing but existing Open Source Software(OSS) and standard Linux boxes, users can build a cluster of redundant load balancers in their environment, regardless of the cloud providers and of on-premise data centers.
 
 The rest of the paper is organized as follows.
 Section \ref{Related Work} highlights related work that deals specifically with container cluster migration,

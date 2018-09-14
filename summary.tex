@@ -1,11 +1,13 @@
 \begin{summary}
-Linux container technology and clusters of the containers are expected to make web services consisting of multiple web servers and a load balancer portable, and thus realize easy migration of web services.
-This prevents service to be locked-in a single cloud provider or a single location.
+
+Linux container technology and clusters of the containers are expected to make web services consisting of multiple web servers and a load balancer portable, and thus realize easy migration of web services across the different cloud providers and on-premise datacenters.
+This prevents service to be locked-in a single cloud provider or a single location and enables users to meet their business needs, e.g., preparing for a natural disaster.
 However existing container management systems lack the generic implementation to route the traffic from the internet into the web service consisting of container clusters.
 For example, Kubernetes, which is one of the most popular container management systems, is heavily dependent on cloud load balancers. If users use unsupported cloud providers or on-premise datacenters, it is up to users to route the traffic into their cluster while keeping the redundancy and scalability.
 This means that users could easily be locked-in the major cloud providers including GCP, AWS, and Azure.
-In this paper, we propose an architecture with a group of containerized load balancers and ECMP redundancy for Kubernetes.
-We containerize Linux IPVS and exabgp, and implement an experimental system using standard Linux boxes and open source software.
+In this paper, we propose an architecture for a group of containerized load balancers with ECMP redundancy.
+We containerize Linux ipvs and exabgp, and then implement an experimental system using standard Linux boxes and open source software.
 We also reveal that our proposed system properly route the traffics with redundancy.
 Our proposed load balancers are usable even if the infrastructure does not have supported load balancers by Kubernetes and thus free users from lock-ins.
+
 \end{summary}
