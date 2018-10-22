@@ -54,26 +54,29 @@ iptables DNAT load balancer and the Nginx Layer 7 load balancing.
 %
 The results indicated that the proposed load balancer could improve the portability of container clusters without performance degradation compared with the existing load balancer.
 
-However, redundancy of the load balancer has not been discussed in our previous work, despite the fact that the redundancy is always needed to improve the availability of services in modern systems.
-Routing traffic to one of the load balancers while keeping redundancy in the container environment is a complex issue
-because standard Layer 2 redundancy protocols, e.g., Virtual Router Redundancy Protocol(VRRP)\cite{hinden2004virtual}
-or OSPF\cite{moy1997ospf}, which uses multicast, cannot be used in many network environments.
+However, the way to route traffic from the Internet to load balancers while keeping redundancy has not been discussed in our previous work, even though the redundancy is always needed to improve the availability of services in modern systems.
+This is because, standard Layer 2 redundancy protocols, e.g., Virtual Router Redundancy Protocol(VRRP)\cite{hinden2004virtual}
+or OSPF\cite{moy1997ospf}, which uses multicast, cannot be used in many network environments for containers.
 Furthermore, providing uniform methods independent of the infrastructures such as various cloud environments and the on-premise data center is much more difficult.
 
-In this paper, we extend the previous work and propose a software load balancer with Equal Cost Multi-Path(ECMP)\cite{thaler2000multipath} redundancy for container cluster environment that does not have a cloud load balancer compatible with Kubernetes.
+In this paper, we extend the previous work and propose a software load balancer architecture with Equal Cost Multi-Path(ECMP)\cite{thaler2000multipath} redundancy for container clusters.
 We containerize an open source BGP software, exabgp\cite{exa-networks_2018}, and also containerize Linux kernel's ipvs load balancer. Then we launch them as a single pod, which is a group of containers that share a single net namespace using Kubernetes.
-We form a cluster of such pods and evaluate the functionality and preliminary performance.
+We launch multiple of such pods and form a cluster of load balancers.
+We demonstrate the functionality and evaluate preliminary performance.
 
 The contributions of this paper are as follows:
 Although there have been studies regarding redundant software load balancers especially from the major cloud providers\cite{eisenbud2016maglev,patel2013ananta}, their load balancers are only usable within their respective cloud infrastructures.
-This paper aims to provide a redundant software load balancer architecture that is usable on many cloud providers and on-premise datacenters.
-Since proposed load balancer architecture uses nothing but existing Open Source Software(OSS) and standard Linux boxes, users can build a cluster of redundant load balancers in their environment, regardless of the cloud providers and of on-premise data centers.
+This paper aims to provide a redundant software load balancer architecture for those environments that do not have load balancers supported by Kuberenetes.
+Since proposed load balancer architecture uses nothing but existing Open Source Software(OSS) and standard Linux boxes, users can build a cluster of redundant load balancers in their environment.
+
+Major cloud providers do not currently provide BGP peering for users; therefore our proposed load balancer may lack ECMP redundancy in such environments and need to access cloud providers APIs to set up the route to the load balancer.
+However, the authors hope they start providing BGP peering, once our proposed load balancer architecture is widely accepted as feasible.
 
 The rest of the paper is organized as follows.
 Section \ref{Related Work} highlights related work that deals specifically with container cluster migration,
 software load balancer containerization, and load balancer related tools within the context of the container technology.
 Section \ref{Proposed Architecture} discusses problems of the existing architecture and proposes our solutions.
-In Section \ref{Implementation}, explain experimental system in detail.
+In Section \ref{Implementation}, we explain experimental system in detail.
 Then, we show our experimental results and discuss obtained characteristics in Section~\ref{Evaluation}, which is followed by a summary of our work in Section~\ref{Conclusions}.
 
 \section{Related Work}\label{Related Work}
@@ -145,9 +148,7 @@ Here we discuss a general overview of the proposed load balancer architectures.
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{Figs/K8sConventional}
-\caption
-
-{Conventional architecture of a Kubernetes cluster.}
+\caption{Conventional architecture of a Kubernetes cluster.}
 \label{fig:K8sConventional}
 \end{figure}
 
@@ -168,18 +169,17 @@ after which it will be distributed again by the DNAT rules on the nodes to the d
 The returning packets will follow the exact same route as the incoming ones.
 
 This architecture has the followings problems: 
-1) Having cloud load balancers whose APIs are supported by the Kubernetes daemons is a prerequisite. 
-There are numerous load balancers which is not supported by the Kubernetes.
-These include the bare metal load balancers for on-premise data centers.  
-In such cases, a user could manually setup the routing table on the gateway so that the traffic would be routed to one of the nodes.
-Then the traffic would be distributed by the DNAT rules on the node to the designated {\em pods}.
-However, this approach would require complicated network configuration and significantly degrade the portability of container clusters.
+1) Having cloud load balancers whose APIs are supported by the Kubernetes daemons is a prerequisite.
+There are numerous load balancers that are not supported by the Kubernetes.
+These include the bare metal load balancers for on-premise data centers.
+In such cases, users are required to set up the routing manually depending on the infrastructure.
+However, this approach significantly degrades the portability of container clusters.
 2) Distributing the traffic twice, first on the external load balancers and second on each node, 
 complicates the administration of packet routing. 
 Imagine a situation in which the DNAT table on one of the nodes malfunctions.
 In such a case, only occasional timeouts would be observed, which would make it very difficult to find out which node was malfunctioning.   
 
-In short, 1) Kubernetes can be used only in limited environments where the external load balancers are supported, 
+In short, 1) Kubernetes is optimized only for limited environments where the external load balancers are supported, 
 and 2) the routes incoming traffic follow are very complex.
 %
 To address these problems, we propose a containerized software load balancer with ECMP redundancy for container cluster environment without a cloud load balancer.
@@ -474,9 +474,9 @@ This means that our proposed portable load balancer container is as good as the 
 The ECMP redundancy is expected to give us the load balancer redundancy and scalability since all the load balancer containers act as active.
 In this subsection we evaluated behavior of the ECMP routing table updates, which is equivalent realizing redundancy. 
 
-The Listing~\ref{single_lb} shows the routing table entry on the router when single load balancer pod exists.
-From this line we can understands that packets toward 10.1.1.0/24 are forwarded to 10.0.0.106 where the load balancer pod is running.
-It also shows that this routing rule is controled by zebra.
+The Listing~\ref{single_lb} shows the routing table entry on the router when a single load balancer pod exists.
+From this line we understand that packets toward 10.1.1.0/24 are forwarded to 10.0.0.106 where the load balancer pod is running.
+It also shows that this routing rule is controlled by zebra.
 
 \begin{lstlisting}[language=bash,caption=Routing table entry with single load balancer pod.,label=single_lb]
 10.1.1.0/24 via 10.0.0.106 dev eth0 proto zebra metric 20
@@ -519,7 +519,7 @@ We implemented an experimental web cluster system with multiple of load balancer
 We conducted performance measurements and found that the ipvs based load balancer in container improved the portability of 
 the Kubernetes cluster system while it showed the comparable performance levels as the existing iptables DNAT based load balancer.
 We also examined that the ECMP redundant feature properly functioned by monitoring the routing table of the upstream router and packet flow as we periodically accessed the web cluster.
-For future work we plan to run performance mesurements for the scalability of our system and also improve performance of a single software load balancer on standard Linux box using Xpress Data Plane(XDP) technology. 
+For future work we plan to run performance measurements for the scalability of our system and also improve performance of a single software load balancer on standard Linux box using Xpress Data Plane(XDP) technology. 
 
 
 
