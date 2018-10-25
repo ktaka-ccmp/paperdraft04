@@ -59,7 +59,7 @@ This is because, standard Layer 2 redundancy protocols, e.g., Virtual Router Red
 or OSPF\cite{moy1997ospf}, which uses multicast, cannot be used in many network environments for containers.
 Furthermore, providing uniform methods independent of the infrastructures such as various cloud environments and the on-premise data center is much more difficult.
 
-In this paper, we extend the previous work and propose a software load balancer architecture with Equal Cost Multi-Path(ECMP)\cite{thaler2000multipath} redundancy by running a BGP agent container together with ipvs container.
+In this paper, we extend the previous work and propose a software load balancer architecture with Equal Cost Multi-Path(ECMP)\cite{thaler2000multipath} redundancy by running a Border Gateway Protocol(BGP) agent container together with ipvs container.
 Although major cloud providers do not currently provide BGP peering service for their users, the authors expect they start such service, once this approach is proven beneficial.
 For the cloud environment without BGP peering service, we can still launch our proposed load balancer without ECMP redundancy by sending out API request to automatically set up a route to the load balancer, from inside the ipvs container.
 
@@ -145,7 +145,7 @@ Here we discuss a general overview of the proposed load balancer architectures.
 
 \subsection{Problems of Kubernetes Cluster}
 
-\begin{figure}
+\begin{figure}[h]
 \includegraphics[width=\columnwidth]{Figs/K8sConventional}
 \caption{Conventional architecture of a Kubernetes cluster.}
 \label{fig:K8sConventional}
@@ -231,7 +231,7 @@ We also present an alternative architecture using VRRP as a comparison in \ref{R
 In order to discuss load balancer redundancy, the knowledge of the overlay network is essential.
 We briefly explain an abstract concept of overlay network that is common to existing overlay network including flannel\cite{coreos_2018} and calico\cite{project_calico}.
 
-\begin{figure}[tb]
+\begin{figure}[h]
 \begin{center}
 \includegraphics[width=\columnwidth]{Figs/overlay.png}
 \end{center}
@@ -250,15 +250,17 @@ The node network is the network for nodes to communicate with each other.
 The overlay network is the network setups for containers to communicate with each other.
 An overlay network typically consists of appropriate routing tables on nodes, and optionally of tunneling setup using ipip or vxlan.
 The upstream router usually belongs to the node network.
-When a container in the Fig.~\ref{fig:overlay} communicates with any node, it can use its IP address in 172.16.0.0/16 IP range as a source IP, since every node has proper routing table for the overlay network.
-When a container communicates with the upstream router that does not have routes regarding the overlay network, the source IP address must be translated by Source Network Address Translation(SNAT) rules on the node the container resides.
+When a container in the Fig.~\ref{fig:overlay} communicates with any of the nodes, it can use its IP address in 172.16.0.0/16 IP range as a source IP, since every node has proper routing table for the overlay network.
+When a container communicates with the upstream router that does not have routing information regarding the overlay network, the source IP address must be translated by Source Network Address Translation(SNAT) rules on the node the container resides.
 
-The SNAT may cause problems when multiple containers on a single node try to connect the upstream router; the upstream router may not be able to distinguish the two separate connections from different containers, from the two separate connections from a single node.
-This was the case in our experimental setups.
+The SNAT caused a problem when we tried to co-host multiple load balancer containers for different services on a single node, and let them connect the upstream router directly.
+This was due to the fact that the BGP agent used in our experiment only used the source IP address of the connection to distinguish the BGP peer.
+The agent behaved as though different BGP connections belonged to a single BGP session because the source IP addresses were the same.
+
 
 \paragraph{\bf Redundancy with ECMP}\label{Redundancy with ECMP}
 
-\begin{figure}[tb]
+\begin{figure}[h]
 \begin{center}
 \includegraphics[width=\columnwidth]{Figs/ecmp.png}
 \end{center}
@@ -273,30 +275,31 @@ This was the case in our experimental setups.
 Fig.~\ref{fig:ecmp} shows our proposed redundancy architecture with ECMP for software load balancer containers.
 %
 The ECMP is a functionality a router often supports, where the router has multiple next hops with equal cost(priority) to a destination, and generally distribute the traffic depending on the hash of the flow five tuples(source IP, destination IP, source port, destination port, protocol).
-The multiple next hops and their cost are often populated using the Border Gateway Protocol(BGP) protocol.
+The multiple next hops and their cost are often populated using the BGP protocol.
 %
 The notable benefit of the ECMP setup is the fact that it is scalable.
 All the load balancers that claims as the next hop is active, i.e., all of them are utilized to increase the performance level.
 Since the traffic from the internet is distributed by the upstream router, the overall throughput is determined by the router after all.
-However, if a software load balancer is capable of handling 1 Gbps equivalent of traffic and the upstream router is capable of handling 10 Gbps, it still is worthwhile launching 10 of the software load balancer containers to fill up maximum throughput of the upstream router.
+However, in practice, there are a lot of cases where this architecture is beneficial.
+For example, if a software load balancer is capable of handling 1 Gbps equivalent of traffic and the upstream router is capable of handling 10 Gbps, it still is worthwhile launching 10 of the software load balancer containers to fill up maximum throughput of the upstream router.
 
 %
-We place a node with the knowledge of the overlay network as a route reflector, to deal with the complexity due to the overlay network.
+We place a node with the knowledge of the overlay network as a route reflector, to deal with the complexity due to the SNAT.
 A route reflector is a network routing component for BGP to reduce the number of peerings by aggregating the routing information\cite{rfc4456}.
 In our proposed architecture we use it as a delegator for load balancer containers towards the upstream router.
-%                                                                                                                                                             
-By using the route reflector, we can have the following benefits.
-1) Each node can accommodate multiple load balancer containers. This was not possible when load balancers and the router had BGP peering through SNAT.
-2) The router does not need to accept peering from random IP addresses that are dynamically assigned to load balancer containers.
 
-We can use standard Linux boxes for route reflectors, and hence we can configure them as we like, e.g., we can make them so that multiple BGP sessions from a single node can be established, and BGP sessions with load balancers are set up dynamically.
-The upstream router does not need to accept BGP session from containers with random IP addresses, but only from the Router Reflector with well known fixed IP address.
-Although not shown in the Fig.~\ref{fig:ecmp}, we could also place another Route Reflector for redundancy.
+By using the route reflector, we can have the following benefits.
+1) Each node can accommodate multiple load balancer containers. This was not possible when we tried to directly connect load balancers and the router through SNAT.
+2) The router does not need to allow peering connections from random IP addresses that may be used by load balancer containers. Now, the router only need to have the reflector information as the BGP peer definition.
+
+Since we use standard Linux boxes for route reflectors, we can configure them as we like, e.g, a) we can make them belong to overlay network so that multiple BGP sessions from a single node can be established, b) we can use a BGP agent that supports dynamic neighbor (or dynamic peer), where one only need to define the IP range as a peer group, and do away with specifing every possible IPs that load balancers may use.
+The upstream router does not need to accept BGP session from containers with random IP addresses, but only from the router reflector with well known fixed IP address. This may be preferrable in terms of security especially when a different organization administors the upstream router.
+Although not shown in the Fig.~\ref{fig:ecmp}, we could also place another route reflector for redundancy.
 
 
 \paragraph{\bf Redundancy with VRRP}\label{Redundancy with VRRP}
 
-\begin{figure}[tb]
+\begin{figure}[h]
 \begin{center}
 \includegraphics[width=\columnwidth]{Figs/vrrp.png}
 \end{center}
@@ -319,11 +322,11 @@ The receiving load balancer in backup state stays calm unless the VRRP advertise
 The UDP multicast is often unsupported in overlay network used by container cluster environment, and hence the load balancer needs to be able to use the node net namespace.
 %
 Running containers in the node net namespace lose the whole point of containerization, i.e., they share the node network without separation.
-This requires the users' additional efforts to avoid conflict in VRRP configuration.
+This requires the users' additional efforts to avoid conflict in VRRP configuration for multiple services.
 %
 
 VRRP programs also support unicast advertisement by specifying IP addresses of peer load balancers when it starts.
-However, container cluster management system randomly assign IP addresses of containers when it launches them.
+However, container cluster management system randomly assign IP addresses of containers when it launches them, and it is impossible to know peer IPs in advance. 
 Therefore the unicast mode is not feasible in container cluster environment.
 
 The other drawback compared with the ECMP case is that the redundancy of VRRP is provided in Active-Backup manner.
@@ -336,7 +339,7 @@ Here we discuss the implementation of the experimental system to prove the conce
 
 \subsection{Experimental system architecture}
 
-\begin{figure}[tb]
+\begin{figure}[h]
 \begin{center}
 \includegraphics[width=\columnwidth]{Figs/poc.png}
 \end{center}
@@ -352,7 +355,7 @@ Fig.~\ref{fig:poc} shows the schematic diagram of proof of concept container clu
 All the nodes and route reflector are configured using Debian 9.5 with self compiled linux-4.16.8 kernel.  
 The upstream router also used conventional linux box using the same OS as the nodes and route reflector.
 For the Linux kernel to support hash based ECMP routing table we needed to use kernel version 4.12 or later.
-We also needed to enable kernel config option CONFIG\_IP\_ROUTE\_MULTIPATH\cite{ip-sysctl}.
+We also needed to enable kernel config option CONFIG\_IP\_ROUTE\_MULTIPATH\cite{ip-sysctl} when compiling, and set the kernel parameter fib\_multipath\_hash\_policy=1 at run time.
 In the actual production environment, proprietary hardware with the highest throughput is often deployed, but we could test some of the required advanced functions by using a Linux box.
 
 The load balancer pods consist of an exabgp container and an ipvs container.
@@ -373,7 +376,7 @@ The configurations for the route reflector is summarised in \ref{appendix:route_
 
 \subsection{Ipvs container}
 
-\begin{figure}
+\begin{figure}[h]
 \includegraphics[width=\columnwidth]{Figs/ipvs-ingress-schem}
 \caption{Implementation of ipvs container.}
 \label{fig:ipvs-ingress-schem}
@@ -408,7 +411,7 @@ For the former case, we also needed to mount the \enquote{/lib/module} of the no
 
 \subsection{BGP software container}
 
-\begin{figure}
+\begin{figure}[h]
 \includegraphics[width=\columnwidth]{Figs/exabgp}
 \caption{Implementation of exabgp container.}
 \label{fig:exabgp}
@@ -448,10 +451,11 @@ A configuration of exabgp is shown in \ref{appendix:exabgp_config}.
 
 \section{Evaluation}\label{Evaluation}
 
-We examined the basic performance of the our proposed load balancer container and the basic function of the ECMP redundancy.
-As for the performance, we measured throughput of the load balancer container and found that it was at least as good as existing software load balancer using Linux. The portability of the load balancer is obvious as we made it runnable as the container using Kubernetes.  
+We examined the basic performance of the our proposed load balancer container and the basic function of the ECMP redundancy cluster of physical servers in on-premise data center.
+As for the performance, we measured throughput of the load balancer container and found that it was at least as good as existing software load balancer using Linux. 
 The ECMP redundancy is examined by watching routing table updates on the router when the new load balancer is add or removed. 
 We also demonstrate two different service with different number of load balancers can share the group of nodes.
+The portability of the load balancer is also evaluated using GCP and GCP.
 
 \subsection{Load balancer performance}
 
@@ -512,6 +516,9 @@ Again, the population of the routing entry was almost instant as we started the 
         nexthop via 10.0.0.107  dev eth0 weight 1
         nexthop via 10.0.0.106  dev eth0 weight 1
 \end{lstlisting}
+
+
+\subsection{Load balancer performance}
 
 
 \section{Conclusions}\label{Conclusions}
