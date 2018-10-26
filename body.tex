@@ -145,7 +145,7 @@ Here we discuss a general overview of the proposed load balancer architectures.
 
 \subsection{Problems of Kubernetes Cluster}
 
-\begin{figure}[h]
+\begin{figure}[tb]
 \includegraphics[width=\columnwidth]{Figs/K8sConventional}
 \caption{Conventional architecture of a Kubernetes cluster.}
 \label{fig:K8sConventional}
@@ -183,7 +183,7 @@ and 2) the routes incoming traffic follow are very complex.
 %
 To address these problems, we propose a containerized software load balancer with ECMP redundancy for container cluster environment without a cloud load balancer.
 
-\begin{figure}[h]
+\begin{figure}[tb]
 \includegraphics[width=1.0\columnwidth]{Figs/K8sProposed}
 \caption{Kubernetes cluster with proposed load balancer.}
 \label{fig:K8sProposed}
@@ -225,13 +225,12 @@ We propose redundancy architecture using ECMP for load balancer containers.
 We first explain overlay network briefly to understand requirements for the architecture in \ref{Overlay network}, then present the proposed architecture with ECMP redundancy in \ref{Redundancy with ECMP}. 
 We also present an alternative architecture using VRRP as a comparison in \ref{Redundancy with VRRP}, which we think is not as good as the architecture using ECMP. 
 
-
 \paragraph{\bf Overlay network}\label{Overlay network}
 
 In order to discuss load balancer redundancy, the knowledge of the overlay network is essential.
 We briefly explain an abstract concept of overlay network that is common to existing overlay network including flannel\cite{coreos_2018} and calico\cite{project_calico}.
 
-\begin{figure}[h]
+\begin{figure}[tb]
 \begin{center}
 \includegraphics[width=\columnwidth]{Figs/overlay.png}
 \end{center}
@@ -260,7 +259,7 @@ The agent behaved as though different BGP connections belonged to a single BGP s
 
 \paragraph{\bf Redundancy with ECMP}\label{Redundancy with ECMP}
 
-\begin{figure}[h]
+\begin{figure}[tb]
 \begin{center}
 \includegraphics[width=\columnwidth]{Figs/ecmp.png}
 \end{center}
@@ -299,7 +298,7 @@ Although not shown in the Fig.~\ref{fig:ecmp}, we could also place another route
 
 \paragraph{\bf Redundancy with VRRP}\label{Redundancy with VRRP}
 
-\begin{figure}[h]
+\begin{figure}[tb]
 \begin{center}
 \includegraphics[width=\columnwidth]{Figs/vrrp.png}
 \end{center}
@@ -339,7 +338,7 @@ Here we discuss the implementation of the experimental system to prove the conce
 
 \subsection{Experimental system architecture}
 
-\begin{figure}[h]
+\begin{figure}[tb]
 \begin{center}
 \includegraphics[width=\columnwidth]{Figs/poc.png}
 \end{center}
@@ -373,10 +372,9 @@ The route reflector also uses a Linux box with gobgp and overlay network setup.
 The other requirements for the route reflector are dynamic-neighbours and add-paths features.
 The configurations for the route reflector is summarised in \ref{appendix:route_reflector_config}.
 
-
 \subsection{Ipvs container}
 
-\begin{figure}[h]
+\begin{figure}[tb]
 \includegraphics[width=\columnwidth]{Figs/ipvs-ingress-schem}
 \caption{Implementation of ipvs container.}
 \label{fig:ipvs-ingress-schem}
@@ -411,7 +409,7 @@ For the former case, we also needed to mount the \enquote{/lib/module} of the no
 
 \subsection{BGP software container}
 
-\begin{figure}[h]
+\begin{figure}[tb]
 \includegraphics[width=\columnwidth]{Figs/exabgp}
 \caption{Implementation of exabgp container.}
 \label{fig:exabgp}
@@ -457,7 +455,106 @@ The ECMP redundancy is examined by watching routing table updates on the router 
 We also demonstrate two different service with different number of load balancers can share the group of nodes.
 The portability of the load balancer is also evaluated using GCP and GCP.
 
-\subsection{Load balancer performance}
+\subsection{Benchmark method}
+
+\begin{figure}
+\includegraphics[width=\columnwidth]{Figs/benchmark-schem}
+\caption{Benchmark setup}
+\label{fig:benchmark-schem}
+\end{figure}
+
+We measured the performance of the load balancers using the wrk.
+Figure~\ref{fig:benchmark-schem} illustrates a schematic diagram of our experimental setup.
+Multiple {\em pods} are deployed on multiple nodes in the Kubernetes cluster. 
+In each {\em pod}, a Nginx web server that returns the IP address of the {\em pod} are running.
+We then set up the IPVS, iptables DNAT, and Nginx load balancers on one of the nodes(the top right node in the Figure~\ref{fig:benchmark-schem}). 
+
+We measured the throughput, Request/sec, of the web service running on the Kubernetes cluster as follows:
+The HTTP GET requests are sent out by the wrk on the client machine toward the nodes,
+using destination IP addresses and port numbers that are chosen based on the type of the load balancer on which the measurement is performed.
+The load balancer on the node then distributes the requests to the {\em pods}.
+Each {\em pod} will return HTTP responses to the load balancer, after which the load balancer returns them to the client.
+Based on the number of responses received by wrk on the client, 
+load balancer performance, in terms of Request/sec can be obtained. 
+
+Figure~\ref{fig:benchmark example} shows an example of the command-line for wrk and the corresponding output.
+The command-line in Figure~\ref{fig:benchmark example} will generate 40 wrk program threads 
+and allow those threads to send out a total of 800 concurrent HTTP requests over the period of 30 seconds.
+The output example shows information including per thread statistics, error counts, Request/sec and Transfer/sec.
+
+Figure~\ref{fig:Hardware and software configuration} shows hardware and software configuration used in our experiments.
+We configured Nginx HTTP server to return a small HTTP content, 
+the IP address of the {\em pod}, to make a relatively severe condition for load balancers. 
+The size of the character string making up an IP address is limited to 15 bytes.
+If we had chosen the HTTP response size so that most of the IP packet resulted in maximum transmission unit(MTU), 
+the performance would have been limited by the Ethernet bandwidth.
+However, since we used small HTTP responses, we could purely measure the load balancer performance.
+
+The hardware we used had eight physical CPU cores and a NIC with 4 rx-queues.
+
+\begin{figure}
+\begin{minipage}{\columnwidth}
+\small
+\begin{Verbatim}[commandchars=\\\{\}]
+\underline{\textbf{Command line:}}
+ wrk -c800 -t40 -d30s http://172.16.72.2:8888/
+-c: concurrency, -t: # of thread, -d: duration
+
+\underline{\textbf{Output example:}}
+ Running 30s test @ http://10.254.0.10:81/
+  40 threads and 800 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    15.82ms   41.45ms   1.90s    91.90%
+    Req/Sec     4.14k   342.26     6.45k    69.24%
+  4958000 requests in 30.10s, 1.14GB read
+  Socket errors: connect 0, read 0, write 0, timeout 1
+Requests/sec: 164717.63
+Transfer/sec:     38.86MB
+\end{Verbatim}
+\end{minipage}
+\caption{Example output of benchmark by wrk}
+\label{fig:benchmark example}
+\end{figure}
+
+\begin{figure}
+\begin{minipage}{0.9\columnwidth}
+\small
+\begin{Verbatim}[commandchars=\\\{\}]
+\underline{\textbf{Physical Machine Specification:}}
+  CPU: Intel(R) Xeon(R) CPU E5-2450 0 @ 2.10GHz
+  # of Physical Cores: 8
+  Hyper Threading: enabled
+  Memory: 32GB
+  NIC: Broadcom BCM5720 Gigabit Ethernet PCIe
+
+\underline{\textbf{Number of Physical Machines:}}
+  Master: 1
+  Node: 7
+  Client: 1
+
+\underline{\textbf{Node Software version:}}
+  OS: Debian 8.7 (Jessie)
+  Kernel: \footnotesize{3.16.0-4-amd64 #1 SMP Debian 3.16.39-1 (2016-12-30)}
+  Kubernetes v1.5.2
+  flannel v0.7.0
+  etcd version: 3.0.15
+
+\underline{\textbf{Load balancer Software version:}}
+  Keepalived: v1.3.2 (12/03,2016)
+  Nginx: nginx/1.11.1
+
+\underline{\textbf{Worker Pod Software version:}}
+  nginx : nginx/1.13.0 
+\end{Verbatim}
+\end{minipage}
+\caption{Hardware and software configuration}
+\label{fig:Hardware and software configuration}
+\end{figure}
+
+
+\section{Result and discussion}
+
+\subsection{Portability}
 
 Fig.~\ref{fig:ipvs-iptables-nginx} shows the throughput of the proposed ipvs load balancer in a container.
 The throughput is measured by sending out http requests from a benchmark program called wrk\cite{Glozer2016} on a benchmark host towards the load balancer pod and counting the number of responses the benchmark host received in a second.
@@ -469,13 +566,25 @@ In this experiment the band width of the 1 Gbps bandwidth of network used in the
 While nginx did not show any benefit as the load balancer, the performance of the ipvs load balancer container showed equivalent performance level as the iptables DNAT load balancing in the node net namespace. 
 This means that our proposed portable load balancer container is as good as the uncontainerized iptables' load balancing to the extent of the 1 Gbps network speed. 
 
-\begin{figure}[h]
+\begin{figure}[tb]
 \includegraphics[width=\columnwidth]{Figs/ipvs-iptables-nginx}
 \caption{Performance of the load balancer container.}
 \label{fig:ipvs-iptables-nginx}
 \end{figure}
 
-\subsection{ECMP route population}
+\begin{figure}[tb]
+\includegraphics[width=\columnwidth]{Figs/gcp_all_ieice}
+\caption{Performance of the proposed load balancer in GCP.}
+\label{fig:gcp_all_ieice}
+\end{figure}
+
+\begin{figure}[tb]
+\includegraphics[width=\columnwidth]{Figs/aws_c4_ieice}
+\caption{Performance of the proposed load balancer in AWS.}
+\label{fig:aws_c4_ieice}
+\end{figure}
+
+\subsection{Redundancy and Scalability}
 
 The ECMP redundancy is expected to give us the load balancer redundancy and scalability since all the load balancer containers act as active.
 In this subsection we evaluated behavior of the ECMP routing table updates, which is equivalent realizing redundancy. 
@@ -517,8 +626,14 @@ Again, the population of the routing entry was almost instant as we started the 
         nexthop via 10.0.0.106  dev eth0 weight 1
 \end{lstlisting}
 
+\begin{figure}[tb]
+\includegraphics[width=\columnwidth]{Figs/ecmp_lb_cubic}
+\caption{Scalability of portable load balancer with ECMP redundancy.}
+\label{fig:ecmp_lb_cubic}
+\end{figure}
 
-\subsection{Load balancer performance}
+\subsection{Resource Consumption}
+
 
 
 \section{Conclusions}\label{Conclusions}
