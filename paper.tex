@@ -36,9 +36,14 @@
 %\captionsetup[lstlisting]{format=listing,labelfont=gray,textfont=gray}
 \DeclareCaptionFormat{listing}{\colorbox{white}{\parbox{\dimexpr\linewidth-2\fboxsep\relax}{#1#2#3}}}
 \captionsetup[lstlisting]{format=listing}
+\usepackage{subcaption}
+\captionsetup{compatibility=false}
 
+\usepackage[export]{adjustbox}
 
+\usepackage[utf8]{inputenc}
 \usepackage{fancyvrb}
+\usepackage{pmboxdraw}
 
 \setcounter{page}{1}
 %\breakauthorline{}% breaks lines after the n-th author

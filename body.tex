@@ -181,7 +181,7 @@ In such a case, only occasional timeouts would be observed, which would make it 
 In short, 1) Kubernetes is optimized only for limited environments where the external load balancers are supported, 
 and 2) the routes incoming traffic follow are very complex.
 %
-To address these problems, we propose a containerized software load balancer with ECMP redundancy for container cluster environment without a cloud load balancer.
+To address these problems, we propose a containerized software load balancer with ECMP redundancy for environments without a cloud load balancer.
 
 \begin{figure}[tb]
 \includegraphics[width=1.0\columnwidth]{Figs/K8sProposed}
@@ -221,7 +221,8 @@ using this framework.
 
 \subsection{Proposed architecture: load balancer redundancy}
 
-We propose redundancy architecture using ECMP for load balancer containers. 
+While containerizing ipvs makes it runnable in any environment, it is essential to discuss how to route the traffic to the ipvs container.
+We propose redundant architecture using ECMP for load balancer containers usable especially in on-premise data centers.
 We first explain overlay network briefly to understand requirements for the architecture in \ref{Overlay network}, then present the proposed architecture with ECMP redundancy in \ref{Redundancy with ECMP}. 
 We also present an alternative architecture using VRRP as a comparison in \ref{Redundancy with VRRP}, which we think is not as good as the architecture using ECMP. 
 
@@ -235,7 +236,7 @@ We briefly explain an abstract concept of overlay network that is common to exis
 \includegraphics[width=\columnwidth]{Figs/overlay.png}
 \end{center}
 \caption{
-  The network architecture of an exemplified container cluster system. \par
+  The network architecture of an exemplified container cluster system. \\ %\par
   A load balancer(lb) pod(the white box with "lb") and web pods are running on nodes(the blue boxes).
   The traffic from the internet are forwarded to the lb pod by the upstream router using the node network,
   and the distributed to web pods using the overlay network.
@@ -254,7 +255,7 @@ When a container communicates with the upstream router that does not have routin
 
 The SNAT caused a problem when we tried to co-host multiple load balancer containers for different services on a single node, and let them connect the upstream router directly.
 This was due to the fact that the BGP agent used in our experiment only used the source IP address of the connection to distinguish the BGP peer.
-The agent behaved as though different BGP connections belonged to a single BGP session because the source IP addresses were the same.
+The agent behaved as though different BGP connections from different containers belonged to a single BGP session because the source IP addresses were identical due to the SNAT.
 
 
 \paragraph{\bf Redundancy with ECMP}\label{Redundancy with ECMP}
@@ -264,7 +265,7 @@ The agent behaved as though different BGP connections belonged to a single BGP s
 \includegraphics[width=\columnwidth]{Figs/ecmp.png}
 \end{center}
 \caption{
-  The proposed architecture of load balancer redundancy with ECMP. \par 
+  The proposed architecture of load balancer redundancy with ECMP. \\ %\par 
   The traffic from the internet is distributed by the upstream router to multiple of lb pods using hash-based ECMP and then distributed by the lb pods to web pods using Linux kernel's ipvs.
   The ECMP routing table on the upstream router is populated using iBGP.
 }
@@ -291,7 +292,10 @@ By using the route reflector, we can have the following benefits.
 1) Each node can accommodate multiple load balancer containers. This was not possible when we tried to directly connect load balancers and the router through SNAT.
 2) The router does not need to allow peering connections from random IP addresses that may be used by load balancer containers. Now, the router only need to have the reflector information as the BGP peer definition.
 
-Since we use standard Linux boxes for route reflectors, we can configure them as we like, e.g, a) we can make them belong to overlay network so that multiple BGP sessions from a single node can be established, b) we can use a BGP agent that supports dynamic neighbor (or dynamic peer), where one only need to define the IP range as a peer group, and do away with specifing every possible IPs that load balancers may use.
+Since we use standard Linux boxes for route reflectors, we can configure them as we like;
+a) We can make them belong to overlay network so that multiple BGP sessions from a single node can be established.
+b) We can use a BGP agent that supports dynamic neighbor (or dynamic peer), where one only needs to define the IP range as a peer group and does away with specifying every possible IP that load balancers may use.
+
 The upstream router does not need to accept BGP session from containers with random IP addresses, but only from the router reflector with well known fixed IP address. This may be preferrable in terms of security especially when a different organization administors the upstream router.
 Although not shown in the Fig.~\ref{fig:ecmp}, we could also place another route reflector for redundancy.
 
@@ -303,14 +307,14 @@ Although not shown in the Fig.~\ref{fig:ecmp}, we could also place another route
 \includegraphics[width=\columnwidth]{Figs/vrrp.png}
 \end{center}
 \caption{
-  An alternative redundant load balancer architecture using VRRP. \par 
+  An alternative redundant load balancer architecture using VRRP. \\ %\par 
   The traffic from the internet is forwarded by the upstream router to a active lb node and then distributed by the lb pods to web pods using Linux kernel's ipvs.
   The active lb pod is selected using VRRP protocol.
 }
 \label{fig:vrrp}
 \end{figure}
 
-Fig.~\ref{fig:vrrp} shows an alternative redundancy setup using the VRRP protocol.
+Fig.~\ref{fig:vrrp} shows an alternative redundancy setup using the VRRP protocol that was first considered by the authors, but did not turn out to be preferable.
 In the case of VRRP, the load balancer container needs to run in the node net namespace for the following two reasons.
 1) When fail over occurs, the new master sends gratuitous Address Resolution Packets(ARP) packets to update the ARP cache of the upstream router and Forwarding Data Base(FDB) of layer 2 swicthes during the transition.
 Such gratuitous ARP packets should consist of the virtual IP address shared by the load balancers and the MAC address of the node where the new master load balancer is running.
@@ -320,11 +324,11 @@ Programs that send out gratuitous ARP with node MAC address should be in the nod
 The receiving load balancer in backup state stays calm unless the VRRP advertisement stops for a specified duration of time.
 The UDP multicast is often unsupported in overlay network used by container cluster environment, and hence the load balancer needs to be able to use the node net namespace.
 %
-Running containers in the node net namespace lose the whole point of containerization, i.e., they share the node network without separation.
+Running containers in the node net namespace loses the whole point of containerization, i.e., they share the node network without separation.
 This requires the users' additional efforts to avoid conflict in VRRP configuration for multiple services.
 %
 
-VRRP programs also support unicast advertisement by specifying IP addresses of peer load balancers when it starts.
+VRRP programs also support unicast advertisement by specifying IP addresses of peer load balancers before it starts.
 However, container cluster management system randomly assign IP addresses of containers when it launches them, and it is impossible to know peer IPs in advance. 
 Therefore the unicast mode is not feasible in container cluster environment.
 
@@ -343,7 +347,7 @@ Here we discuss the implementation of the experimental system to prove the conce
 \includegraphics[width=\columnwidth]{Figs/poc.png}
 \end{center}
 \caption{
-  An experimental container cluster with proposed redundant software balancers. \par 
+  An experimental container cluster with proposed redundant software balancers. \\ %\par 
   The master and nodes are configured as Kubernetes's master and nodes on top of conventional Linux boxes, respectively.
   The route reflector and the upstream router are also conventional Linux boxes.
 }
@@ -355,9 +359,9 @@ All the nodes and route reflector are configured using Debian 9.5 with self comp
 The upstream router also used conventional linux box using the same OS as the nodes and route reflector.
 For the Linux kernel to support hash based ECMP routing table we needed to use kernel version 4.12 or later.
 We also needed to enable kernel config option CONFIG\_IP\_ROUTE\_MULTIPATH\cite{ip-sysctl} when compiling, and set the kernel parameter fib\_multipath\_hash\_policy=1 at run time.
-In the actual production environment, proprietary hardware with the highest throughput is often deployed, but we could test some of the required advanced functions by using a Linux box.
+In the actual production environment, proprietary hardware with the highest throughput is often deployed, but we could still test some of the required advanced functions by using a Linux box.
 
-The load balancer pods consist of an exabgp container and an ipvs container.
+Each load balancer pod consists of an exabgp container and an ipvs container.
 The ipvs container is responsible for distributing the traffic toward the IP address that a service uses, to web(nginx) server pods.
 The ipvs container monitors the availability of web server pods and manages the load balancing rule appropriately.
 The exabgp container is responsible for advertising the route toward the IP address that a service uses, to the route reflector.
@@ -369,7 +373,7 @@ The gobgp supports the add-path, and the FIB manipulation through zebra\cite{osr
 The configurations for the router is summarised in \ref{appendix:router_config}.
 
 The route reflector also uses a Linux box with gobgp and overlay network setup.
-The other requirements for the route reflector are dynamic-neighbours and add-paths features.
+The requirements for the BGP agent on the route reflector are dynamic-neighbours and add-paths features.
 The configurations for the route reflector is summarised in \ref{appendix:route_reflector_config}.
 
 \subsection{Ipvs container}
@@ -380,7 +384,7 @@ The configurations for the route reflector is summarised in \ref{appendix:route_
 \label{fig:ipvs-ingress-schem}
 \end{figure}
 
-The proposed load balancer needs to dynamically reconfigure the ipvs balancing rules whenever {\em pods} are created/deleted. 
+The proposed load balancer needs to dynamically reconfigure the ipvs balancing rules whenever {\em pods} are created or deleted. 
 Fig.~\ref{fig:ipvs-ingress-schem} is a schematic diagram of ipvs container to show the dynamic reconfiguration of the ipvs rules.
 Two daemon programs, controller and keepalived, run in the container are illustrated.
 The keepalived manages Linux kernel's ipvs rules depending on the ipvs.conf configuration file.
@@ -390,11 +394,11 @@ If the health check to a {\em real server} fails, keepalived will remove that {\
 
 The controller monitors information concerning the running {\em pods} of a service 
 in the Kubernetes cluster by consulting the apiserver running in the master.
-Whenever {\em pods} are created or deleted, the controller automatically regenerate an appropriate ipvs.conf 
+Whenever {\em pods} are created or deleted, the controller notices the change and automatically regenerate an appropriate ipvs.conf 
 and issue SIGHUP to keepalived.
 Then, keepalived will reload the ipvs.conf and modify the kernel's ipvs rules accordingly.
 The actual controller\cite{ktaka_ccmp_2017_826894} is implemented using the Kubernetes ingress controller\cite{K8sIngress2017} framework. 
-By importing existing Golang package, \enquote{k8s.io/ingress /core/pkg/ingress}, we could simplify the implementation, e.g. 
+By importing existing Golang package, \enquote{k8s.io/ingress/core/pkg/ingress}, we could simplify the implementation, e.g. 
 120 lines of code.  
 
 Keepalived and the controller are placed in the docker image of ipvs container.
@@ -410,97 +414,103 @@ For the former case, we also needed to mount the \enquote{/lib/module} of the no
 \subsection{BGP software container}
 
 \begin{figure}[tb]
-\includegraphics[width=\columnwidth]{Figs/exabgp}
-\caption{Implementation of exabgp container.}
-\label{fig:exabgp}
+
+  \begin{subfigure}[t]{\columnwidth}
+    \includegraphics[width=0.9\columnwidth]{Figs/exabgp}
+    \caption{}
+    \label{fig:exabgp_schem}
+  \end{subfigure}
+
+  \par\bigskip
+
+  \begin{subfigure}[t]{\columnwidth}
+
+\centering
+\begin{Verbatim}[commandchars=\\\{\}]
+───────────────────────────────────────────────────────
+ [BGP announcement]
+     route 10.1.1.0/24 next-hop 10.0.0.106 
+
+ [Routing in node net namespace]
+     ip netns exec node \textbackslash
+             ip route replace 10.1.1.0/24 dev docker0
+      
+ [Accept as local]
+     ip route add local 10.1.1.0/24 dev eth0 
+───────────────────────────────────────────────────────
+\end{Verbatim}
+
+    \caption{}
+    \label{fig:exabgp_setting}
+  \end{subfigure}
+
+  \caption{
+    (a) Network path by the exabgp container. (b) Required settings in the exabgp container.
+  }
+  \label{fig:exabgp}
 \end{figure}
 
-Fig.~\ref{fig:exabgp} shows a schematic diagram of an exabgp container. We used exabgp as the BGP advertiser as mentioned earlier.
-Table~\ref{table:exabgp} summarises some key settings required for the exabgp container.
-The node IP address, 10.0.0.106 is used as the next-hop for the IP range 10.1.1.0/24 used by a service in BGP announcements since the upstream router has no knowledge of IP assigned to an exabgp container.
-In order to route the packets toward the IP used by the service to a container, a routing rule to the dev docker0 is created in the node net namespace for the route to properly accept the packets and route them to the container.
-A routing rule to accept the packets as local is also required in the container net namespace. 
+In order to implement the ECMP redundancy, we also containerized exabgp using Docker.
+Fig.\ref{fig:exabgp}~(\subref{fig:exabgp_schem}) shows a schematic diagram of the network path realized by the exabgp container.
+We used exabgp as the BGP advertiser as mentioned earlier.
+The traffic from the Internet is forwarded by ECMP routing table on the router to the node, then routed to ipvs container.
+
+Fig.\ref{fig:exabgp}~(\subref{fig:exabgp_setting}) summarises some key settings required for the exabgp container.
+In BGP announcements the node IP address, 10.0.0.106 is used as the next-hop for the IP range 10.1.1.0/24.
+Then on the node, in order to route the packets toward 10.1.1.0/24 to the ipvs container, 
+a routing rule to the dev docker0 is created in the node net namespace. 
+A routing rule to accept the packets toward those IPs as local is also required in the container net namespace. 
 A configuration of exabgp is shown in \ref{appendix:exabgp_config}.
 
-\begin{table}[tb]% 
-\begin{center}
-\begin{tabular}{l}
-\hline
-\textbf{BGP announcement:}\\
-\hspace*{5mm} route 10.1.1.0/24 next-hop 10.0.0.106 \\
-\textbf{Routing in node net namespace:}\\
-\hspace*{5mm} ip netns exec node ip route replace 10.1.1.0/24 dev docker0 \\
-\textbf{Accept as local:}\\
-\hspace*{5mm} ip route add local 10.1.1.0/24 dev eth0 \\
-\hline
-\end{tabular}
-\halflineskip
-
-\caption{
-  The required settings in exabgp container. \par 
-  The node IP address, 10.0.0.106 is used as next-hop for the IP range 10.1.1.0/24 used by a service in BGP announcement.
-  In order to route the packets toward the IP used by the service to a container, a routing rule to the dev docker0 is created in the node net namespace.
-  A routing rule to accept the packets as local is also required. 
-}
-\label{table:exabgp}
-
-\end{center}
-\end{table}
 
 \section{Evaluation}\label{Evaluation}
 
-We examined the basic performance of the our proposed load balancer container and the basic function of the ECMP redundancy cluster of physical servers in on-premise data center.
-As for the performance, we measured throughput of the load balancer container and found that it was at least as good as existing software load balancer using Linux. 
-The ECMP redundancy is examined by watching routing table updates on the router when the new load balancer is add or removed. 
-We also demonstrate two different service with different number of load balancers can share the group of nodes.
-The portability of the load balancer is also evaluated using GCP and GCP.
+In order to understand the feasibility of the proposed load balancer architecture, we evaluated it with the following three criteria;
+(1) Basic functionality and Portability: 
+We evaluated the load balancer functionality using physical servers in on-premise data center and compared peformance level with existing iptables DNAT and nginx as a load balancer. 
+We also carried out the same performance measurement in GCP and AWS to show the containerized ipvs load balancer is runnable even in cloud environment.
+(2) Redundancy and Scalability:
+We evaluated ECMP functionality by watching routing table updates on the router when the new load balancer is add or removed. 
+We also evaluated the performance level by changing number of load balancers.
 
-\subsection{Benchmark method}
+The following subsections explain the evaluation in detail.
 
-\begin{figure}
-\includegraphics[width=\columnwidth]{Figs/benchmark-schem}
-\caption{Benchmark setup}
-\label{fig:benchmark-schem}
+%(3) Resource comsumption.
+%We examined the basic performance of the our proposed load balancer container and the basic function of the ECMP redundancy using cluster of physical servers in on-premise data center.
+%As for the performance, we measured throughput of the load balancer container and found that it was at least as good as existing software load balancer using Linux. 
+%The ECMP redundancy is examined by . 
+%We also demonstrate two different service with different number of load balancers can share the group of nodes.
+%The portability of the load balancer is also evaluated using GCP and GCP.
+
+\subsection{Basic functionality and portability}
+
+\begin{figure}[bt]
+  \includegraphics[width=0.9\columnwidth]{Figs/ipvs-iptables-nginx}
+  \caption{Performance of the load balancer container.}
+  \label{fig:ipvs-iptables-nginx}
 \end{figure}
 
-We measured the performance of the load balancers using the wrk.
-Figure~\ref{fig:benchmark-schem} illustrates a schematic diagram of our experimental setup.
-Multiple {\em pods} are deployed on multiple nodes in the Kubernetes cluster. 
-In each {\em pod}, a Nginx web server that returns the IP address of the {\em pod} are running.
-We then set up the IPVS, iptables DNAT, and Nginx load balancers on one of the nodes(the top right node in the Figure~\ref{fig:benchmark-schem}). 
 
-We measured the throughput, Request/sec, of the web service running on the Kubernetes cluster as follows:
-The HTTP GET requests are sent out by the wrk on the client machine toward the nodes,
-using destination IP addresses and port numbers that are chosen based on the type of the load balancer on which the measurement is performed.
-The load balancer on the node then distributes the requests to the {\em pods}.
-Each {\em pod} will return HTTP responses to the load balancer, after which the load balancer returns them to the client.
-Based on the number of responses received by wrk on the client, 
-load balancer performance, in terms of Request/sec can be obtained. 
+\begin{figure}[tb]
 
-Figure~\ref{fig:benchmark example} shows an example of the command-line for wrk and the corresponding output.
-The command-line in Figure~\ref{fig:benchmark example} will generate 40 wrk program threads 
-and allow those threads to send out a total of 800 concurrent HTTP requests over the period of 30 seconds.
-The output example shows information including per thread statistics, error counts, Request/sec and Transfer/sec.
+  \begin{subfigure}[t]{\columnwidth}
+    \includegraphics[width=0.9\columnwidth]{Figs/lb_single_schem}
+    \caption{}
+    \label{fig:lb_single_schem}
+  \end{subfigure}
 
-Figure~\ref{fig:Hardware and software configuration} shows hardware and software configuration used in our experiments.
-We configured Nginx HTTP server to return a small HTTP content, 
-the IP address of the {\em pod}, to make a relatively severe condition for load balancers. 
-The size of the character string making up an IP address is limited to 15 bytes.
-If we had chosen the HTTP response size so that most of the IP packet resulted in maximum transmission unit(MTU), 
-the performance would have been limited by the Ethernet bandwidth.
-However, since we used small HTTP responses, we could purely measure the load balancer performance.
+  \par\bigskip
 
-The hardware we used had eight physical CPU cores and a NIC with 4 rx-queues.
+  \begin{subfigure}[t]{\columnwidth}
 
-\begin{figure}
-\begin{minipage}{\columnwidth}
-\small
+\centering
 \begin{Verbatim}[commandchars=\\\{\}]
-\underline{\textbf{Command line:}}
+───────────────────────────────────────────────────────
+[Command line]
  wrk -c800 -t40 -d30s http://172.16.72.2:8888/
 -c: concurrency, -t: # of thread, -d: duration
 
-\underline{\textbf{Output example:}}
+[Output example]
  Running 30s test @ http://10.254.0.10:81/
   40 threads and 800 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
@@ -510,56 +520,48 @@ The hardware we used had eight physical CPU cores and a NIC with 4 rx-queues.
   Socket errors: connect 0, read 0, write 0, timeout 1
 Requests/sec: 164717.63
 Transfer/sec:     38.86MB
+───────────────────────────────────────────────────────
 \end{Verbatim}
-\end{minipage}
-\caption{Example output of benchmark by wrk}
-\label{fig:benchmark example}
-\end{figure}
 
-\begin{figure}
-\begin{minipage}{0.9\columnwidth}
-\small
+    \caption{}
+    \label{fig:bench_example}
+  \end{subfigure}
+
+  \begin{subfigure}[t]{\columnwidth}
 \begin{Verbatim}[commandchars=\\\{\}]
-\underline{\textbf{Physical Machine Specification:}}
-  CPU: Intel(R) Xeon(R) CPU E5-2450 0 @ 2.10GHz
-  # of Physical Cores: 8
-  Hyper Threading: enabled
+───────────────────────────────────────────────────────
+[Hardware Specification]
+  CPU: Xeon E5-2450 2.10GHz x 8 (with Hyper Threading) 
   Memory: 32GB
-  NIC: Broadcom BCM5720 Gigabit Ethernet PCIe
+  NIC: Broadcom BCM5720 Giga bit 
+ (Node x 6, LB x 1, Client x 1)
 
-\underline{\textbf{Number of Physical Machines:}}
-  Master: 1
-  Node: 7
-  Client: 1
-
-\underline{\textbf{Node Software version:}}
-  OS: Debian 8.7 (Jessie)
-  Kernel: \footnotesize{3.16.0-4-amd64 #1 SMP Debian 3.16.39-1 (2016-12-30)}
+[Node Software]
+  OS: Debian 8.7, linux-3.16.0-4-amd64
   Kubernetes v1.5.2
   flannel v0.7.0
   etcd version: 3.0.15
 
-\underline{\textbf{Load balancer Software version:}}
+[Container Software]
   Keepalived: v1.3.2 (12/03,2016)
-  Nginx: nginx/1.11.1
-
-\underline{\textbf{Worker Pod Software version:}}
-  nginx : nginx/1.13.0 
+  nginx : 1.11.1(load balancer), 1.13.0(web server) 
+───────────────────────────────────────────────────────
 \end{Verbatim}
-\end{minipage}
-\caption{Hardware and software configuration}
-\label{fig:Hardware and software configuration}
+    \caption{}
+    \label{fig:hw_sw_spec}
+  \end{subfigure}
+
+  \caption{
+    (a) Benchmark setup. (b) Benchmark commandline and output example. (c) HW SW spec.
+  }
+  \label{fig:benchmark-schem}
 \end{figure}
 
 
-\section{Result and discussion}
-
-\subsection{Portability}
-
 Fig.~\ref{fig:ipvs-iptables-nginx} shows the throughput of the proposed ipvs load balancer in a container.
-The throughput is measured by sending out http requests from a benchmark program called wrk\cite{Glozer2016} on a benchmark host towards the load balancer pod and counting the number of responses the benchmark host received in a second.
+The throughput is measured by sending out http requests from a benchmark program called wrk\cite{Glozer2016} on a benchmark host towards the load balancer pod and counting the number of responses the benchmark host received in a second as shown in Fig.~\ref{fig:benchmark-schem}.
 The performance of the nginx as the load balancer and the iptables DNAT as the Round Robin load balancer are also presented as references.
-As we increased the number of the web server containers (or pods) from 1 to around 14 the performance of the ipvs pod increased almost linearly and after which it saturated. 
+As we increased the number of the web server containers (or pods) from 1 to around 14, the performance of the ipvs pod increased almost linearly and after which it saturated. 
 The increase is considered as the evidence of the benefit of placing a load balancer in front of web servers and let the web servers share the load.
 The saturated performance level indicated the maximum performance of the cluster consisting of one load balancer and multiple web server pods.
 In this experiment the band width of the 1 Gbps bandwidth of network used in the experiment\cite{takahashi2018portable} was limiting the performance.
@@ -567,22 +569,34 @@ While nginx did not show any benefit as the load balancer, the performance of th
 This means that our proposed portable load balancer container is as good as the uncontainerized iptables' load balancing to the extent of the 1 Gbps network speed. 
 
 \begin{figure}[tb]
-\includegraphics[width=\columnwidth]{Figs/ipvs-iptables-nginx}
-\caption{Performance of the load balancer container.}
-\label{fig:ipvs-iptables-nginx}
+
+  \begin{subfigure}[t]{\columnwidth}
+    \includegraphics[width=0.9\columnwidth]{Figs/gcp_all_ieice}
+    \caption{GCP}
+    \label{fig:gcp_all_ieice}
+  \end{subfigure}
+
+  \par\bigskip
+
+  \begin{subfigure}[t]{\columnwidth}
+    \includegraphics[width=0.9\columnwidth]{Figs/aws_c4_ieice}
+    \caption{AWS with Node x 6, Client x 1, Load balancer x 1. Custom instance. }
+    \label{fig:aws_c4_ieice}
+  \end{subfigure}
+
+  \caption{Performance of the proposed load balancer in Cloud environment.
+(a) GCP: Web: 
+}
+  \label{fig:ipvs_performance_in_aws_gcp}
+
 \end{figure}
 
-\begin{figure}[tb]
-\includegraphics[width=\columnwidth]{Figs/gcp_all_ieice}
-\caption{Performance of the proposed load balancer in GCP.}
-\label{fig:gcp_all_ieice}
-\end{figure}
+Fig.~\ref{fig:ipvs_performance_in_aws_gcp} shows the load balancer performance level, measured in GCP and AWS, respectively.
+In the cloud dependency on CPU can be easily tested.
+Same charasteristic with on-premise measurement.
 
-\begin{figure}[tb]
-\includegraphics[width=\columnwidth]{Figs/aws_c4_ieice}
-\caption{Performance of the proposed load balancer in AWS.}
-\label{fig:aws_c4_ieice}
-\end{figure}
+We could success fully run proposed load balancer container and confirmed it functioned as we expected.
+
 
 \subsection{Redundancy and Scalability}
 
@@ -593,30 +607,46 @@ The Listing~\ref{single_lb} shows the routing table entry on the router when a s
 From this line we understand that packets toward 10.1.1.0/24 are forwarded to 10.0.0.106 where the load balancer pod is running.
 It also shows that this routing rule is controlled by zebra.
 
-\begin{lstlisting}[language=bash,caption=Routing table entry with single load balancer pod.,label=single_lb]
-10.1.1.0/24 via 10.0.0.106 dev eth0 proto zebra metric 20
-\end{lstlisting}
+\begin{figure}[tb]
+    \includegraphics[width=0.9\columnwidth]{Figs/lb_ecmp_schem}
+    \caption{}
+    \label{fig:lb_ecmp_schem}
+\end{figure}
 
-When the number of the load balancer pods is increased to three, we can see the routing table entry as the Listing~\ref{three_lb}.
-We have three next hops towards 10.1.1.0/24 each of which being the node where the load balancer pods are running.
-The weights of the three next-hops are all 1.   
+\begin{figure}[tb]
 
-\begin{lstlisting}[language=bash,caption=Routing table entry with three load balancer pods.,label=three_lb]
+\begin{subfigure}[t]{\columnwidth}
+\centering
+\begin{Verbatim}[commandchars=\\\{\}]
+───────────────────────────────────────────────────────
+10.1.1.0/24 via 10.0.0.106 \textbackslash 
+                        dev eth0 proto zebra metric 20
+───────────────────────────────────────────────────────
+\end{Verbatim}
+\caption{Routing table entry with single load balancer pod.}
+\label{fig:single}
+\end{subfigure}
+\par\bigskip
+
+\begin{subfigure}[t]{\columnwidth}
+\centering
+\begin{Verbatim}[commandchars=\\\{\}]
+───────────────────────────────────────────────────────
 10.1.1.0/24 proto zebra metric 20
         nexthop via 10.0.0.105  dev eth0 weight 1
         nexthop via 10.0.0.106  dev eth0 weight 1
         nexthop via 10.0.0.107  dev eth0 weight 1
-\end{lstlisting}
+───────────────────────────────────────────────────────
+\end{Verbatim}
+\caption{Routing table entry with three load balancer pods.}
+\label{fig:three}
+\end{subfigure}
+\par\bigskip
 
-%{\bf The ECMP is functioning .... packets are arriving for both load balancers.
-%W need evidence of pakets arriving all pods.. }
-
-The Listing~\ref{double_services} shows the case where we started new service with two load balancer pods with service addresses in 10.1.2.0/24 range.
-We could accommodate two different services toward different IP addresses, one with three load balancers and the other with two load balancers on a group of nodes(10.0.0,105,10.0.0,106,10.0.0,107). 
-Again, the population of the routing entry was almost instant as we started the load balancers for the second service.
-
-
-\begin{lstlisting}[language=bash,caption=Routing table entry with additional service with two load balancer pods started.,label=double_services]
+\begin{subfigure}[t]{\columnwidth}
+\centering
+\begin{Verbatim}[commandchars=\\\{\}]
+───────────────────────────────────────────────────────
 10.1.1.0/24 pro to zebra metric 20
         nexthop via 10.0.0.107  dev eth0 weight 1
         nexthop via 10.0.0.105  dev eth0 weight 1
@@ -624,12 +654,52 @@ Again, the population of the routing entry was almost instant as we started the 
 10.1.2.0/24 proto zebra metric 20
         nexthop via 10.0.0.107  dev eth0 weight 1
         nexthop via 10.0.0.106  dev eth0 weight 1
-\end{lstlisting}
+───────────────────────────────────────────────────────
+\end{Verbatim}
+\caption{Routing table entry with two services with two, three load balancer pods respectively.}
+\label{fig:double_svc}
+\end{subfigure}
+\par\bigskip
+
+\caption{ECMP routing tables.}
+\label{fig:exabgp_routing_table}
+\end{figure}
+
+When the number of the load balancer pods is increased to three, we can see the routing table entry as the Listing~\ref{fig:three_lb}.
+We have three next hops towards 10.1.1.0/24 each of which being the node where the load balancer pods are running.
+The weights of the three next-hops are all 1.   
+
+The Listing~\ref{fig:double_services} shows the case where we started new service with two load balancer pods with service addresses in 10.1.2.0/24 range.
+We could accommodate two different services toward different IP addresses, one with three load balancers and the other with two load balancers on a group of nodes(10.0.0,105,10.0.0,106,10.0.0,107). 
+Again, the population of the routing entry was almost instant as we started the load balancers for the second service.
 
 \begin{figure}[tb]
-\includegraphics[width=\columnwidth]{Figs/ecmp_lb_cubic}
-\caption{Scalability of portable load balancer with ECMP redundancy.}
-\label{fig:ecmp_lb_cubic}
+
+  \begin{subfigure}[t]{\columnwidth}
+    \includegraphics[width=0.9\columnwidth,left]{Figs/ecmp_lb_cubic_ieice}
+    \caption{Caption 1}
+    \label{fig:ecmp_lb_cubic_ieice}
+  \end{subfigure}
+
+  \par\bigskip
+
+  \begin{subfigure}[t]{\columnwidth}
+    \includegraphics[width=0.98\columnwidth,left]{Figs/ecmp_response_ieice}
+    \caption{Caption 2}
+    \label{fig:ecmp_response_ieice}
+  \end{subfigure}
+
+  \par\bigskip
+
+  \begin{subfigure}[t]{\columnwidth}
+    \includegraphics[width=0.9\columnwidth,left]{Figs/ecmp_delay_histgram_ieice}
+    \caption{Caption 2}
+    \label{fig:ecmp_delay_histgram_ieice}
+  \end{subfigure}
+
+  \caption{Scalability of portable load balancer with ECMP redundancy.}
+  \label{fig:ecmp_delay_histgram_ieice}
+
 \end{figure}
 
 \subsection{Resource Consumption}
