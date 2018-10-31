@@ -130,7 +130,7 @@ since Kubernetes ingress framework already provided the methods to retrieve runn
 
 As far as the cloud load balancers are concerned, two articles have been identified.
 Google's Maglev\cite{eisenbud2016maglev} is a software load balancer used in Google Cloud Platform(GCP).
-Maglev uses modern technologies including per flow ECMP and kernel bypass for userspace packet processing.
+Maglev uses modern technologies including per flow ECMP and kernel bypass for user space packet processing.
 Maglev serves as the GCP's load balancer that is used by the Kubernetes.
 Maglev is not a product that users can use outside of GCP nor is an open source software, while the users need open source software load balancer that is runnable even in on-premise data centers.
 Microsoft's Ananta\cite{patel2013ananta} is another software load balancer implementation using ECMP and windows network stack.
@@ -286,7 +286,7 @@ For example, if a software load balancer is capable of handling 1 Gbps equivalen
 %
 We place a node with the knowledge of the overlay network as a route reflector, to deal with the complexity due to the SNAT.
 A route reflector is a network routing component for BGP to reduce the number of peerings by aggregating the routing information\cite{rfc4456}.
-In our proposed architecture we use it as a delegator for load balancer containers towards the upstream router.
+In our proposed architecture we use it as a delegater for load balancer containers towards the upstream router.
 
 By using the route reflector, we can have the following benefits.
 1) Each node can accommodate multiple load balancer containers. This was not possible when we tried to directly connect load balancers and the router through SNAT.
@@ -296,7 +296,7 @@ Since we use standard Linux boxes for route reflectors, we can configure them as
 a) We can make them belong to overlay network so that multiple BGP sessions from a single node can be established.
 b) We can use a BGP agent that supports dynamic neighbor (or dynamic peer), where one only needs to define the IP range as a peer group and does away with specifying every possible IP that load balancers may use.
 
-The upstream router does not need to accept BGP session from containers with random IP addresses, but only from the router reflector with well known fixed IP address. This may be preferrable in terms of security especially when a different organization administors the upstream router.
+The upstream router does not need to accept BGP session from containers with random IP addresses, but only from the router reflector with well known fixed IP address. This may be preferable in terms of security especially when a different organization administers the upstream router.
 Although not shown in the Fig.~\ref{fig:ecmp}, we could also place another route reflector for redundancy.
 
 
@@ -546,7 +546,7 @@ Transfer/sec:     38.86MB
   \end{subfigure}
 
   \caption{
-    (a) Benchmark setup. (b) Benchmark commandline and output example. (c) HW SW spec.
+    (a) Benchmark setup. (b) Benchmark command line and output example. (c) HW SW spec.
   }
   \label{fig:benchmark-schem}
 \end{figure}
@@ -626,7 +626,7 @@ After that, in order to show the scalability, we also measured the throughput fr
 
 Fig.~\ref{fig:lb_ecmp_schem} shows the schematic diagram of the experimental setup and also summarizes hardware and software specifications.
 Notable differences from the previous throughput experiment in Fig.~\ref{fig:benchmark-schem} are as follows;
-1) Each load balancer pods now consists of both an ipvs container and an exbgp container.
+1) Each load balancer pods now consists of both an ipvs container and an exabgp container.
 2) The routing table of the benchmark client is updated by BGP protocol through a route reflector.
 3) The NIC of the benchmark client has been changed to 10 Gbps card since now we have multiple of ipvs container load balancers that will use up to 1 Gbps bandwidth.
 4) Some of the software have been updated to the most recent versions at the time of the experiment.
@@ -674,7 +674,7 @@ It also shows that this routing rule is controlled by zebra.
   \end{subfigure}
 
   \caption{
-    (a) Benchmark setup. (b) Benchmark commandline and output example. (c) HW SW spec.
+    (a) Benchmark setup. (b) Benchmark command line and output example. (c) HW SW spec.
   }
   \label{fig:ecmp-benchmark-schem}
 \end{figure}
@@ -737,26 +737,28 @@ We have three next hops towards 10.1.1.0/24 each of which being the node where t
 The weights of the three next-hops are all 1.
 The update of the routing entry was almost instant as we increased the number of the load balancers.
 
-Fig.~\ref{fig:exabgp_routing_table}~(\subref{fig:double_svc}) shows the case where we additionaly started new service with two load balancer pods with service addresses in 10.1.2.0/24 range.
+Fig.~\ref{fig:exabgp_routing_table}~(\subref{fig:double_svc}) shows the case where we additionally started new service with two load balancer pods with service addresses in 10.1.2.0/24 range.
 We could accommodate two different services toward different IP addresses, one with three load balancers and the other with two load balancers on a group of nodes(10.0.0,105,10.0.0,106,10.0.0,107).
 The update of the routing entry was almost instant as we started the load balancers for the second service.
 
 We also carried out throughput measurement to show that our proposed architecture increases the throughput as we increase the number of the load balancers.
 Fig.~\ref{fig:ecmp_delay_histgram_ieice}~(\subref{fig:ecmp_lb_cubic_ieice}) shows the results of the measurements.
-There are four solid lines in the figure, each conrresponding the throughput result when there are one through four of the proposed load balancers.
+There are four solid lines in the figure, each corresponding the throughput result when there are one through four of the proposed load balancers.
 %As can be seen in the figure, as we increased the number of the pod the thoroughput increased linearly to a certain level after which it saturated.
-The saturated levels, i.e. performane levels depend on the number of the ipvs load balancer pods(lb x 1 being the case with one ipvs pods, and lb x2 being two of them and as such), which increases linearly as we increases the number of the load balancers.
-The dotted line in the figure show the throughput result when there were five load balancers. 
-It had almost same paformance level as the case when there were four load balancers, and we suspect that this was due to the performance limit of the router as the bench mark client, since CPU idle was 0\%.
-We expect that replacing the benchmark client with more powerfull machines will improve the performance level further. 
+The saturated levels, i.e. performance levels depend on the number of the ipvs load balancer pods(lb x 1 being the case with one ipvs pods, and lb x2 being two of them and as such), which increases linearly as we increases the number of the load balancers.
+The dotted line in the figure shows the throughput result when there were five load balancers.
+It had almost the same performance level as the case when there were four load balancers, and did not scale further.
+We suspect that this was because we used up CPU power of the benchmark client since the CPU idle was 0\% when there were more than four load balancers.
+We expect that replacing the benchmark client with more powerful machines, or changing the experimental setup so that multiple benchmark clients can access the load balancers through an ECMP router, will improve the performance level further.
 
-Fig.~\ref{fig:ecmp_delay_histgram_ieice}~(\subref{fig:ecmp_response_ieice}) shows the throughput measurement results when we periodicaly changed the number of the load balancers. 
+Fig.~\ref{fig:ecmp_delay_histgram_ieice}~(\subref{fig:ecmp_response_ieice}) shows the throughput measurement results when we periodically changed the number of the load balancers. 
 The red line in the figure shows the number of the ipvs load balancer pods, which we changed randomly every 60 seconds.
 The blue line corresponds to the resulting throughput.
-As we can see from the figure, the blue line nicely follows the red line.
+As we can see from the figure, the blue line nicely follows the shape of the red line.
+This indicates that new load balancers are immediately utilized after they are created, and after removing some load balancers, the traffic to them is immediately directed to the existing load balancers.
 
-Fig.~\ref{fig:ecmp_delay_histgram_ieice}~(\subref{fig:ecmp_delay_histgram_ieice}) shows histgram of the ECMP update delay, where we measured the delays until the change in number of running pods is reflected in the routing table in the router during the experiment in Fig.~\ref{fig:ecmp_delay_histgram_ieice}~(\subref{fig:ecmp_response_ieice}) for 20 hours.
-As we can see form the figure, most of the delays are within 7 seconds, and the largest delay during the 20 hours experiment was 10 seconds.
+Fig.~\ref{fig:ecmp_delay_histgram_ieice}~(\subref{fig:ecmp_delay_histgram_ieice}) shows histogram of the ECMP update delay, where we measured the delays until the number of running ipvs pods is reflected in the routing table on the benchmark client, as we change the number of the ipvs pods randomly every 60 seconds for 20 hours.
+As we can see from the figure, most of the delays are within 7 seconds, and the largest delay during the 20 hours experiment was 10 seconds.
 We can conclude that ECMP routing update in our proposed architecture is quick enough.
 
 \begin{figure}[tb]
@@ -789,7 +791,6 @@ We can conclude that ECMP routing update in our proposed architecture is quick e
 \end{figure}
 
 \subsection{Resource Consumption}
-
 
 \section{Conclusions}\label{Conclusions}
 
