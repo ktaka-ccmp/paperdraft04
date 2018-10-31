@@ -355,7 +355,7 @@ Here we discuss the implementation of the experimental system to prove the conce
 \end{figure}
 
 Fig.~\ref{fig:poc} shows the schematic diagram of proof of concept container cluster system with our proposed redundant software load balancers.
-All the nodes and route reflector are configured using Debian 9.5 with self compiled linux-4.16.8 kernel.  
+All the nodes and route reflector are configured using Debian 9.5 with self compiled linux-4.16.12 kernel.  
 The upstream router also used conventional linux box using the same OS as the nodes and route reflector.
 For the Linux kernel to support hash based ECMP routing table we needed to use kernel version 4.12 or later.
 We also needed to enable kernel config option CONFIG\_IP\_ROUTE\_MULTIPATH\cite{ip-sysctl} when compiling, and set the kernel parameter fib\_multipath\_hash\_policy=1 at run time.
@@ -532,13 +532,13 @@ Transfer/sec:     38.86MB
 
 [Node Software]
   OS: Debian 8.7, linux-3.16.0-4-amd64
-  Kubernetes v1.5.2
+  Kubernetes v1.10.6
   flannel v0.7.0
   etcd version: 3.0.15
 
 [Container Software]
   Keepalived: v1.3.2 (12/03,2016)
-  nginx : 1.11.1(load balancer), 1.13.0(web server) 
+  nginx : 1.15.4(web server) 
 ───────────────────────────────────────────────────────
 \end{Verbatim}
     \caption{}
@@ -621,7 +621,7 @@ Still, we can say that the load balancers can be run in GCP and AWS, and functio
 \subsection{Redundancy and Scalability}
 
 The ECMP redundancy is expected to give us the load balancer redundancy and scalability since all the load balancer containers act as active.
-We evaluated the behavior of the ECMP routing table updates, by changing the number of the load balancers.
+We examined the behavior of the ECMP routing table updates, by changing the number of the load balancers.
 After that, we also measured the throughput when multiple of the ipvs container load balancers are deployed.
 
 Fig.~\ref{fig:lb_ecmp_schem} shows the schematic diagram of the experimental setup and also summarizes hardware and software specifications.
@@ -741,7 +741,24 @@ Fig.~\ref{fig:exabgp_routing_table}~(\subref{fig:double_svc}) shows the case whe
 We could accommodate two different services toward different IP addresses, one with three load balancers and the other with two load balancers on a group of nodes(10.0.0,105,10.0.0,106,10.0.0,107).
 The update of the routing entry was almost instant as we started the load balancers for the second service.
 
-We also carried out throughput measurement to show our proposed architecture increases as we increase the number of the load balancers.
+We also carried out throughput measurement to show that our proposed architecture increases the throughput as we increase the number of the load balancers.
+Fig.~\ref{fig:ecmp_delay_histgram_ieice}~(\subref{fig:ecmp_lb_cubic_ieice}) shows the results of the measurements.
+There are four solid lines in the figure, each conrresponding the throughput result when there are one through four of the proposed load balancers.
+%As can be seen in the figure, as we increased the number of the pod the thoroughput increased linearly to a certain level after which it saturated.
+The saturated levels, i.e. performane levels depend on the number of the ipvs load balancer pods(lb x 1 being the case with one ipvs pods, and lb x2 being two of them and as such), which increases linearly as we increases the number of the load balancers.
+The dotted line in the figure show the throughput result when there were five load balancers. 
+It had almost same paformance level as the case when there were four load balancers, and we suspect that this was due to the performance limit of the router as the bench mark client, since CPU idle was 0\%.
+We expect that replacing the benchmark client with more powerfull machines will improve the performance level further. 
+
+Fig.~\ref{fig:ecmp_delay_histgram_ieice}~(\subref{fig:ecmp_response_ieice}) shows the throughput measurement results when we periodicaly changed the number of the load balancers. 
+The red line in the figure shows the number of the ipvs load balancer pods, which we changed randomly every 60 seconds.
+The blue line corresponds to the resulting throughput.
+As we can see from the figure, the blue line nicely follows the red line.
+
+Fig.~\ref{fig:ecmp_delay_histgram_ieice}~(\subref{fig:ecmp_delay_histgram_ieice}) shows histgram of the ECMP update delay, where we measured the delays until the change in number of running pods is reflected in the routing table in the router during the experiment in Fig.~\ref{fig:ecmp_delay_histgram_ieice}~(\subref{fig:ecmp_response_ieice}) for 20 hours.
+As we can see form the figure, most of the delays are within 7 seconds, and the largest delay during the 20 hours experiment was 10 seconds.
+We can conclude that ECMP routing update in our proposed architecture is quick enough.
+
 \begin{figure}[tb]
 
   \begin{subfigure}[t]{\columnwidth}
