@@ -60,7 +60,8 @@ or OSPF\cite{moy1997ospf}, which uses multicast, cannot be used in many network 
 Furthermore, providing uniform methods independent of the infrastructures such as various cloud environments and the on-premise data center is much more difficult.
 
 In this paper, we extend the previous work and propose a software load balancer architecture with Equal Cost Multi-Path(ECMP)\cite{thaler2000multipath} redundancy by running a Border Gateway Protocol(BGP) agent container together with ipvs container.
-Although major cloud providers do not currently provide BGP peering service for their users, the authors expect they start such service, once this approach is proven beneficial.
+Although major cloud providers do not currently provide BGP peering service for their users, the authors expect they start such service, once this approach is proven to be beneficial.
+Therefore we focus our discussions on verifying that our proposed load balancer architecture is feasible at least in on-premise data centers.
 For the cloud environment without BGP peering service, we can still launch our proposed load balancer without ECMP redundancy by sending out API request to automatically set up a route to the load balancer, from inside the ipvs container.
 
 In order to demonstrate the feasibility of the proposed load balancer, we containerize an open source BGP software, exabgp\cite{exa-networks_2018}, and also containerize Linux kernel's ipvs load balancer. Then we launch them as a single pod, which is a group of containers that share a single net namespace using Kubernetes. We launch multiple of such pods and form a cluster of load balancers.
@@ -285,7 +286,7 @@ For example, if a software load balancer is capable of handling 1 Gbps equivalen
 
 %
 We place a node with the knowledge of the overlay network as a route reflector, to deal with the complexity due to the SNAT.
-A route reflector is a network routing component for BGP to reduce the number of peerings by aggregating the routing information\cite{rfc4456}.
+A route reflector is a network component for BGP to reduce the number of peerings by aggregating the routing information\cite{rfc4456}.
 In our proposed architecture we use it as a delegater for load balancer containers towards the upstream router.
 
 By using the route reflector, we can have the following benefits.
@@ -296,8 +297,8 @@ Since we use standard Linux boxes for route reflectors, we can configure them as
 a) We can make them belong to overlay network so that multiple BGP sessions from a single node can be established.
 b) We can use a BGP agent that supports dynamic neighbor (or dynamic peer), where one only needs to define the IP range as a peer group and does away with specifying every possible IP that load balancers may use.
 
-The upstream router does not need to accept BGP session from containers with random IP addresses, but only from the router reflector with well known fixed IP address. This may be preferable in terms of security especially when a different organization administers the upstream router.
-Although not shown in the Fig.~\ref{fig:ecmp}, we could also place another route reflector for redundancy.
+The upstream router does not need to accept BGP sessions from containers with random IP addresses, but only from the router reflector with well known fixed IP address. This may be preferable in terms of security especially when a different organization administers the upstream router.
+Although not shown in the Fig.~\ref{fig:ecmp}, we could also place another route reflector for redundancy purpose.
 
 
 \paragraph{\bf Redundancy with VRRP}\label{Redundancy with VRRP}
@@ -321,7 +322,7 @@ Such gratuitous ARP packets should consist of the virtual IP address shared by t
 Programs that send out gratuitous ARP with node MAC address should be in the node net namespace.
 %
 2) Furthermore, the active load balancer sends out periodic advertisement using UDP multicast packet to inform existence of itself.
-The receiving load balancer in backup state stays calm unless the VRRP advertisement stops for a specified duration of time.
+The load balancer in backup state stays calm unless the VRRP advertisement stops for a specified duration of time.
 The UDP multicast is often unsupported in overlay network used by container cluster environment, and hence the load balancer needs to be able to use the node net namespace.
 %
 Running containers in the node net namespace loses the whole point of containerization, i.e., they share the node network without separation.
@@ -465,7 +466,7 @@ A configuration of exabgp is shown in \ref{appendix:exabgp_config}.
 
 \section{Evaluation}\label{Evaluation}
 
-In order to understand the feasibility of the proposed load balancer architecture, we evaluated it with the following three criteria;
+In order to verify the feasibility of the proposed load balancer architecture, we evaluated it with the following criteria;
 (1) Basic functionality and Portability:
 We evaluated the load balancer functionality using physical servers in on-premise data center and compared performance level with existing iptables DNAT and nginx as a load balancer.
 We also carried out the same performance measurement in GCP and AWS to show the containerized ipvs load balancer is runnable even in the cloud environment.
@@ -599,19 +600,24 @@ The software versions used for Kubernetes, web server and load balancer {\em pod
 
 \end{figure}
 
+\interfootnotelinepenalty=10000
+
 Fig.~\ref{fig:ipvs_performance}~(\subref{fig:ipvs-iptables-nginx}) shows the throughput of the proposed ipvs container load balancer.
 The performance of the nginx and the iptables DNAT as the load balancers are also presented for comparison.
 As we increased the number of the nginx pods(web servers) from 1 to around 14, the throughput increased almost linearly and after which it saturated.
 The increase indicates that the load balancer functions properly because it increased throughput by distributing HTTP requests to multiple of the web servers.
-The saturated performance level indicates the maximum performance of the load balancer, which could be determined either by network bandwidth, hardware performance for load balancer or that for the benchmark client.
-In this specific experiment, the performance level was limited by the 1 Gbps bandwidth of experimental network\cite{takahashi2018portable}, which is revealed by packet level analysis using tcpdump.
+The saturated performance level indicates the maximum performance of the load balancer, which could be determined either by network bandwidth or CPU level of the load balancer or the benchmark client.
+In this specific experiment, the performance level was limited by the 1 Gbps bandwidth of experimental network\cite{takahashi2018portable}, which is revealed by packet level analysis using tcpdump.\footnote{
+On average the data size of each request was about 636 [byte/req] including TCP/IP headers, ethernet header, and interframe gaps.
+Multiplying that with 190K [req/sec] and 8 [bit/byte] will result in 966.72 Mbps.
+}
 While nginx did not show any benefit as the load balancer, the performance of the ipvs load balancer container showed equivalent performance level as the un-containerized iptables DNAT.
 This means that our proposed ipvs container load balancer is at least as good as the un-containerized iptables' load balancing in the 1 Gbps network.
 
 Fig.~\ref{fig:ipvs_performance}~(\subref{fig:gcp_all_ieice}) and Fig.~\ref{fig:ipvs_performance}~(\subref{fig:aws_c4_ieice}) show the load balancer performance levels that are measured in GCP and AWS, respectively.
 These are aimed to show that our proposed load balancer can be run in cloud environments and also functions properly.
 
-Both results show similar characteristics as the experiment in an on-premise data center in Fig.~\ref{fig:ipvs_performance}~(\subref{fig:ipvs-iptables-nginx}), where throughput increased linearly to a certain level that is determined by either network speed or machine specifications.
+Both results show similar characteristics as the experiment in an on-premise data center in Fig.~\ref{fig:ipvs_performance}~(\subref{fig:ipvs-iptables-nginx}), where throughput increased linearly to a certain saturation level that is determined by either network speed or machine specifications.
 Since in the cases of cloud environments we can easily change the machine specifications, especially CPU counts, we measured throughput with several conditions of them.
 From the first look of the results, since changing CPU counts changed the load balancer's throughput saturation levels, we thought VM's computation power limited the performance levels.
 However, since there are cases in the cloud environment, where changing the VM types or CPU counts also changes the network bandwidth limit, a detailed analysis is further required in the future to clarify which factor limits the throughput in the cases of these cloud environments.
@@ -622,21 +628,9 @@ Still, we can say that the proposed ipvs load balancers can be run in GCP and AW
 
 The ECMP technique is expected to make the load balancers redundant and scalable since all the load balancer containers act as active.
 We examined the behavior of the ECMP routing table updates, by changing the number of the load balancers.
-After that, in order to show the scalability, we also measured the throughput from a benchmark client with ECMP routes when multiple of the ipvs container load balancers are deployed.
+After that, in order to explore the scalability, we also measured the throughput from a benchmark client with ECMP routes when multiple of the ipvs container load balancers are deployed.
 
-Fig.~\ref{fig:lb_ecmp_schem} shows the schematic diagram of the experimental setup and also summarizes hardware and software specifications.
-Notable differences from the previous throughput experiment in Fig.~\ref{fig:benchmark-schem} are as follows;
-1) Each load balancer pods now consists of both an ipvs container and an exabgp container.
-2) The routing table of the benchmark client is updated by BGP protocol through a route reflector.
-3) The NIC of the benchmark client has been changed to 10 Gbps card since now we have multiple of ipvs container load balancers that will use up to 1 Gbps bandwidth.
-4) Some of the software have been updated to the most recent versions at the time of the experiment.
-
-First, we examined ECMP functionality by watching the routing table on the benchmark client.
-Fig.~\ref{fig:exabgp_routing_table}~(\subref{fig:single}) shows the routing table entry on the router when a single load balancer pod exists.
-From this line, we can tell that packets toward 10.1.1.0/24 are forwarded to 10.0.0.106 where the load balancer pod is running.
-It also shows that this routing rule is controlled by zebra.
-
-\begin{figure}[tb]
+\begin{figure}[h]
 
 \begin{subfigure}[b]{\columnwidth}
     \includegraphics[width=0.9\columnwidth]{Figs/lb_ecmp_schem}
@@ -679,8 +673,14 @@ It also shows that this routing rule is controlled by zebra.
   \label{fig:ecmp-benchmark-schem}
 \end{figure}
 
+Fig.~\ref{fig:ecmp-benchmark-schem} shows the schematic diagram of the experimental setup and also summarizes hardware and software specifications.
+Notable differences from the previous throughput experiment in Fig.~\ref{fig:benchmark-schem} are as follows;
+1) Each load balancer pods now consists of both an ipvs container and an exabgp container.
+2) The routing table of the benchmark client is updated by BGP protocol through a route reflector.
+3) The NIC of the benchmark client has been changed to 10 Gbps card since now we have multiple of ipvs container load balancers that are capable of filling up 1 Gbps bandwidth.
+4) Some of the software have been updated to the most recent versions at the time of the experiment.
 
-\begin{figure}[tb]
+\begin{figure}[h]
 
 \begin{subfigure}[t]{\columnwidth}
 \centering
@@ -732,13 +732,18 @@ It also shows that this routing rule is controlled by zebra.
 \label{fig:exabgp_routing_table}
 \end{figure}
 
+First, we examined ECMP functionality by watching the routing table on the benchmark client.
+Fig.~\ref{fig:exabgp_routing_table}~(\subref{fig:single}) shows the routing table entry on the router when a single load balancer pod exists.
+From this line, we can tell that packets toward 10.1.1.0/24 are forwarded to 10.0.0.106 where the load balancer pod is running.
+It also shows that this routing rule is controlled by zebra.
+
 When the number of the load balancer pods is increased to three, we can see the routing table entry in Fig.~\ref{fig:exabgp_routing_table}~(\subref{fig:three}).
 We have three next hops towards 10.1.1.0/24 each of which being the node where the load balancer pods are running.
 The weights of the three next-hops are all 1.
 The update of the routing entry was almost instant as we increased the number of the load balancers.
 
 Fig.~\ref{fig:exabgp_routing_table}~(\subref{fig:double_svc}) shows the case where we additionally started new service with two load balancer pods with service addresses in 10.1.2.0/24 range.
-We could accommodate two different services toward different IP addresses, one with three load balancers and the other with two load balancers on a group of nodes(10.0.0,105,10.0.0,106,10.0.0,107).
+We could accommodate two different services with different IP addresses, one with three load balancers and the other with two load balancers on a group of nodes(10.0.0,105,10.0.0,106,10.0.0,107).
 The update of the routing entry was almost instant as we started the load balancers for the second service.
 
 We also carried out throughput measurement to show that our proposed architecture increases the throughput as we increase the number of the load balancers.
@@ -796,10 +801,13 @@ We can conclude that ECMP routing update in our proposed architecture is quick e
 
 In this paper, we proposed a portable load balancer with ECMP redundancy for the Kubernetes cluster systems that is aimed at facilitating migration of container clusters for web services.
 We implemented an experimental web cluster system with multiple of load balancers and web servers using Kubernetes and OSSs on top of standard Linux boxes to prove the functionality of the proposed architecture.
-We conducted performance measurements and found that the ipvs based load balancer in container improved the portability of 
-the Kubernetes cluster system while it showed the comparable performance levels as the existing iptables DNAT based load balancer.
-We also examined that the ECMP redundant feature properly functioned by monitoring the routing table of the upstream router and packet flow as we periodically accessed the web cluster.
-For future work we plan to run performance measurements for the scalability of our system and also improve performance of a single software load balancer on standard Linux box using Xpress Data Plane(XDP) technology. 
+We conducted performance measurements and found that the ipvs based load balancer in container functioned properly both in on-premise datacenter and cloud environments while it showed the comparable performance levels as the existing iptables DNAT based load balancer.
+We also carried out expriments to verify the feasibility of ECMP redundancy in on-premise data center, and revealed that it functions properly with linear scalability up to four load balancers.
+The current limitations of this study are; 
+1) Although our proposed architecture is feasible where users can set up iBGP peer connections to upstream routers, currently major cloud providers do not seem to provide such services.
+2) ...
+These should be addressed in the future work.
+For other future work we plan to improve performance of a single software load balancer on standard Linux box using Xpress Data Plane(XDP) technology. 
 
 
 
