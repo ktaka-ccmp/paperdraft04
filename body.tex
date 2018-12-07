@@ -74,7 +74,7 @@ Since proposed load balancer architecture uses nothing but existing Open Source 
 
 The rest of the paper is organized as follows.
 Section \ref{Related Work} highlights related work that deals specifically with container cluster migration,
-software load balancer containerization, and load balancer related tools within the context of the container technology.
+software load balancer containerization, load balancer related tools within the context of the container technology, and scalable load balancer in the cloud providers.
 Section \ref{Proposed Architecture} discusses problems of the existing architecture and proposes our solutions.
 In Section \ref{Implementation}, we explain experimental system in detail.
 Then, we show our experimental results and discuss obtained characteristics in Section~\ref{Evaluation}, which is followed by a summary of our work in Section~\ref{Conclusions}.
@@ -360,7 +360,7 @@ All the nodes and route reflector are configured using Debian 9.5 with self comp
 The upstream router also used conventional linux box using the same OS as the nodes and route reflector.
 For the Linux kernel to support hash based ECMP routing table we needed to use kernel version 4.12 or later.
 We also needed to enable kernel config option CONFIG\_IP\_ROUTE\_MULTIPATH\cite{ip-sysctl} when compiling, and set the kernel parameter fib\_multipath\_hash\_policy=1 at run time.
-In the actual production environment, proprietary hardware with the highest throughput is often deployed, but we could still test some of the required advanced functions by using a Linux box.
+In the actual production environment, proprietary hardware with the highest throughput is often used for the upstream router, but we could still test some of the required advanced functions by using a Linux box.
 
 Each load balancer pod consists of an exabgp container and an ipvs container.
 The ipvs container is responsible for distributing the traffic toward the IP address that a service uses, to web(nginx) server pods.
@@ -368,7 +368,7 @@ The ipvs container monitors the availability of web server pods and manages the 
 The exabgp container is responsible for advertising the route toward the IP address that a service uses, to the route reflector.
 The route reflector aggregates the routing information advertised by load balancer pods and advertise them to the upstream router.
 
-The exabgp is used in the load balancer pods because of the simplicity in setting as static route advertiser.
+Exabgp is used in the load balancer pods because of the simplicity in setting as static route advertiser.
 On the other hand, gobgp is used in the router and the route reflector, because exabgp did not seem to support add-path\cite{rfc7911} needed for multi-path advertisement and Forwarding Information Base(FIB) manipulation\cite{exa-networks_2018}.
 The gobgp supports the add-path, and the FIB manipulation through zebra\cite{osrg_gobgp_zebra}.
 The configurations for the router is summarised in \ref{appendix:router_config}.
@@ -389,7 +389,7 @@ The proposed load balancer needs to dynamically reconfigure the ipvs balancing r
 Fig.~\ref{fig:ipvs-ingress-schem} is a schematic diagram of ipvs container to show the dynamic reconfiguration of the ipvs rules.
 Two daemon programs, controller and keepalived, run in the container are illustrated.
 The keepalived manages Linux kernel's ipvs rules depending on the ipvs.conf configuration file.
-It is also capable of health-checking the liveliness of {\em real server}, 
+It is also capable of health-checking the liveness of {\em real server}, 
 which is represented as a combination of the IP addresses and port numbers of the target {\em pods}. 
 If the health check to a {\em real server} fails, keepalived will remove that {\em real server} from the ipvs rules.
 
@@ -528,8 +528,8 @@ Transfer/sec:     38.86MB
 [Hardware Specification]
   CPU: Xeon E5-2450 2.10GHz x 8 (with Hyper Threading) 
   Memory: 32GB
-  NIC: Broadcom BCM5720 Giga bit 
- (Node x 6, LB x 1, Client x 1)
+  NIC: Broadcom BCM5720 1Gbps
+ (Node x 6, Load balancer x 1, Client x 1)
 
 [Node Software]
   OS: Debian 8.7, linux-3.16.0-4-amd64
@@ -539,7 +539,7 @@ Transfer/sec:     38.86MB
 
 [Container Software]
   Keepalived: v1.3.2 (12/03,2016)
-  nginx : 1.15.4(web server) 
+  nginx : 1.11.1(load balancer), 1.13.0(web server) 
 ───────────────────────────────────────────────────────
 \end{Verbatim}
     \caption{}
@@ -547,7 +547,7 @@ Transfer/sec:     38.86MB
   \end{subfigure}
 
   \caption{
-    (a) Benchmark setup. (b) Benchmark command line and output example. (c) HW SW spec.
+    (a) Benchmark setup. (b) Benchmark command line and output example. (c) Hardware and software specifications.
   }
   \label{fig:benchmark-schem}
 \end{figure}
@@ -606,7 +606,7 @@ Fig.~\ref{fig:ipvs_performance}~(\subref{fig:ipvs-iptables-nginx}) shows the thr
 The performance of the nginx and the iptables DNAT as the load balancers are also presented for comparison.
 As we increased the number of the nginx pods(web servers) from 1 to around 14, the throughput increased almost linearly and after which it saturated.
 The increase indicates that the load balancer functions properly because it increased throughput by distributing HTTP requests to multiple of the web servers.
-The saturated performance level indicates the maximum performance of the load balancer, which could be determined either by network bandwidth or CPU level of the load balancer or the benchmark client.
+The saturated performance level indicates the maximum performance of the load balancer, which could be determined either by network bandwidth or CPU performance level of the load balancer or the benchmark client.
 In this specific experiment, the performance level was limited by the 1 Gbps bandwidth of experimental network\cite{takahashi2018portable}, which is revealed by packet level analysis using tcpdump.\footnote{
 On average the data size of each request was about 636 [byte/req] including TCP/IP headers, ethernet header, and interframe gaps.
 Multiplying that with 190K [req/sec] and 8 [bit/byte] will result in 966.72 Mbps.
@@ -644,13 +644,13 @@ After that, in order to explore the scalability, we also measured the throughput
 [Hardware Specification]
   CPU: Xeon E5-2450 2.10GHz x 8 (with Hyper Threading) 
   Memory: 32GB
-  NIC: Broadcom BCM5720 Giga bit 
- (Node x 6, Client x 1)
+  NIC: Broadcom BCM5720 1Gbps
+ (Node x 6, Load balancer x 4)
 
   CPU: Xeon E5-2450 2.10GHz x 8 (with Hyper Threading) 
   Memory: 32GB
-  NIC: Intel X550
- (LB x 1)
+  NIC: Intel X550 10Gbps
+ (Client x 1)
   
 [Node Software]
   OS: Debian 9.5, linux-4.16.8
@@ -660,7 +660,7 @@ After that, in order to explore the scalability, we also measured the throughput
 
 [Container Software]
   Keepalived: v1.3.2 (12/03,2016)
-  nginx : 1.11.1(load balancer), 1.13.0(web server) 
+  nginx : 1.15.4(web server) 
 ───────────────────────────────────────────────────────
 \end{Verbatim}
     \caption{}
@@ -668,7 +668,7 @@ After that, in order to explore the scalability, we also measured the throughput
   \end{subfigure}
 
   \caption{
-    (a) Benchmark setup. (b) Benchmark command line and output example. (c) HW SW spec.
+    (a) Benchmark setup. (b) Hardware and software specifications.
   }
   \label{fig:ecmp-benchmark-schem}
 \end{figure}
@@ -734,7 +734,7 @@ Notable differences from the previous throughput experiment in Fig.~\ref{fig:ben
 
 First, we examined ECMP functionality by watching the routing table on the benchmark client.
 Fig.~\ref{fig:exabgp_routing_table}~(\subref{fig:single}) shows the routing table entry on the router when a single load balancer pod exists.
-From this line, we can tell that packets toward 10.1.1.0/24 are forwarded to 10.0.0.106 where the load balancer pod is running.
+From this entry, we can tell that packets toward 10.1.1.0/24 are forwarded to 10.0.0.106 where the load balancer pod is running.
 It also shows that this routing rule is controlled by zebra.
 
 When the number of the load balancer pods is increased to three, we can see the routing table entry in Fig.~\ref{fig:exabgp_routing_table}~(\subref{fig:three}).
@@ -746,14 +746,45 @@ Fig.~\ref{fig:exabgp_routing_table}~(\subref{fig:double_svc}) shows the case whe
 We could accommodate two different services with different IP addresses, one with three load balancers and the other with two load balancers on a group of nodes(10.0.0,105,10.0.0,106,10.0.0,107).
 The update of the routing entry was almost instant as we started the load balancers for the second service.
 
+\begin{figure}[t]
+
+  \begin{subfigure}[t]{\columnwidth}
+    \includegraphics[width=0.9\columnwidth,left]{Figs/ecmp_lb_cubic_ieice}
+    \caption{Throughput of ECMP redundant load balancer.}
+    The throughputs are measured for a single load balancer(lb x1), two(lb x2), three(lb x3) and four(lb x4) load balancers.
+    \label{fig:ecmp_lb_cubic_ieice}
+  \end{subfigure}
+
+  \par\bigskip
+
+  \begin{subfigure}[t]{\columnwidth}
+    \includegraphics[width=0.98\columnwidth,left]{Figs/ecmp_response_ieice}
+    \caption{Throughput responsiveness.}
+    This shows the throughput responsiveness when the number of the load balancers was changed randomly in every 60 seconds.
+    \label{fig:ecmp_response_ieice}
+  \end{subfigure}
+
+  \par\bigskip
+
+  \begin{subfigure}[t]{\columnwidth}
+    \includegraphics[width=0.9\columnwidth,left]{Figs/ecmp_delay_histgram_ieice}
+  \caption{A histogram of the ECMP update delay.}
+This shows the delays until the number of running ipvs pods is reflected into the routing table on the benchmark client,
+when the number of the ipvs pods is changed randomly every 60 seconds for 20 hours.
+    \label{fig:ecmp_delay_histgram_ieice}
+  \end{subfigure}
+
+  \caption{Scalability of portable load balancer with ECMP redundancy.}
+  \label{fig:ecmp_scalability}
+
+\end{figure}
+
 We also carried out throughput measurement to show that our proposed architecture increases the throughput as we increase the number of the load balancers.
 Fig.~\ref{fig:ecmp_scalability}~(\subref{fig:ecmp_lb_cubic_ieice}) shows the results of the measurements.
 There are four solid lines in the figure, each corresponding the throughput result when there are one through four of the proposed load balancers.
 %As can be seen in the figure, as we increased the number of the pod the thoroughput increased linearly to a certain level after which it saturated.
-The saturated levels, i.e. performance levels depend on the number of the ipvs load balancer pods(lb x 1 being the case with one ipvs pods, and lb x2 being two of them and as such), which increases linearly as we increases the number of the load balancers.
-The dotted line in the figure shows the throughput result when there were five load balancers.
-It had almost the same performance level as the case when there were four load balancers, and did not scale further.
-We suspect that this was because we used up CPU power of the benchmark client since the CPU idle was 0\% when there were more than four load balancers.
+The saturated levels, i.e. performance levels depend on the number of the ipvs load balancer pods(lb x 1 being the case with one ipvs pods, and lb x2 being two of them and as such). The performance level increases linearly as we increases the number of the load balancers up to four of the ipvs load balancers, but did not scale further.
+This was because we used up CPU power of the benchmark client since the CPU idle was 0\% when there were more than four load balancers.
 We expect that replacing the benchmark client with more powerful machines, or changing the experimental setup so that multiple benchmark clients can access the load balancers through an ECMP router, will improve the performance level further.
 
 Fig.~\ref{fig:ecmp_scalability}~(\subref{fig:ecmp_response_ieice}) shows the throughput measurement results when we periodically changed the number of the load balancers. 
@@ -766,34 +797,7 @@ Fig.~\ref{fig:ecmp_scalability}~(\subref{fig:ecmp_delay_histgram_ieice}) shows h
 As we can see from the figure, most of the delays are within 6 seconds, and the largest delay during the 20 hours experiment was 10 seconds.
 We can conclude that ECMP routing update in our proposed architecture is quick enough.
 
-\begin{figure}[tb]
-
-  \begin{subfigure}[t]{\columnwidth}
-    \includegraphics[width=0.9\columnwidth,left]{Figs/ecmp_lb_cubic_ieice}
-    \caption{Caption 1}
-    \label{fig:ecmp_lb_cubic_ieice}
-  \end{subfigure}
-
-  \par\bigskip
-
-  \begin{subfigure}[t]{\columnwidth}
-    \includegraphics[width=0.98\columnwidth,left]{Figs/ecmp_response_ieice}
-    \caption{Caption 2}
-    \label{fig:ecmp_response_ieice}
-  \end{subfigure}
-
-  \par\bigskip
-
-  \begin{subfigure}[t]{\columnwidth}
-    \includegraphics[width=0.9\columnwidth,left]{Figs/ecmp_delay_histgram_ieice}
-    \caption{Caption 2}
-    \label{fig:ecmp_delay_histgram_ieice}
-  \end{subfigure}
-
-  \caption{Scalability of portable load balancer with ECMP redundancy.}
-  \label{fig:ecmp_scalability}
-
-\end{figure}
+\FloatBarrier
 
 \subsection{Resource Consumption}
 
