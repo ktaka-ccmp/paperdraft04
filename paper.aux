@@ -42,71 +42,69 @@
 \newlabel{fig:overlay}{{3}{4}}
 \newlabel{Overlay network}{{(1)}{4}}
 \citation{rfc4456}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces  The proposed architecture of load balancer redundancy with ECMP.   The traffic from the internet is distributed by the upstream router to multiple of lb pods using hash-based ECMP and then distributed by the lb pods to web pods using Linux kernel's ipvs. The ECMP routing table on the upstream router is populated using iBGP. \relax }}{5}}
+\citation{ip-sysctl}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces The proposed architecture of load balancer redundancy with ECMP.\relax }}{5}}
 \newlabel{fig:ecmp}{{4}{5}}
 \newlabel{Redundancy with ECMP}{{(2)}{5}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces  An alternative redundant load balancer architecture using VRRP.   The traffic from the internet is forwarded by the upstream router to a active lb node and then distributed by the lb pods to web pods using Linux kernel's ipvs. The active lb pod is selected using VRRP protocol. \relax }}{5}}
-\newlabel{fig:vrrp}{{5}{5}}
-\newlabel{Redundancy with VRRP}{{(3)}{5}}
-\citation{ip-sysctl}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces  An experimental container cluster with proposed redundant software balancers. \relax }}{5}}
+\newlabel{fig:poc}{{5}{5}}
+\newlabel{Implementation}{{4}{5}}
 \citation{rfc7911}
 \citation{exa-networks_2018}
 \citation{osrg_gobgp_zebra}
 \citation{ktaka_ccmp_2017_826894}
 \citation{K8sIngress2017}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces  An experimental container cluster with proposed redundant software balancers.   The master and nodes are configured as Kubernetes's master and nodes on top of conventional Linux boxes, respectively. The route reflector and the upstream router are also conventional Linux boxes. \relax }}{6}}
-\newlabel{fig:poc}{{6}{6}}
-\newlabel{Implementation}{{4}{6}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Implementation of ipvs container.\relax }}{6}}
-\newlabel{fig:ipvs-ingress-schem}{{7}{6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Implementation of ipvs container.\relax }}{6}}
+\newlabel{fig:ipvs-ingress-schem}{{6}{6}}
+\newlabel{Evaluation}{{5}{6}}
 \citation{Glozer2016}
-\citation{takahashi2018portable}
-\newlabel{fig:exabgp_schem}{{8a}{7}}
+\newlabel{fig:exabgp_schem}{{7a}{7}}
 \newlabel{sub@fig:exabgp_schem}{{a}{7}}
-\newlabel{fig:exabgp_setting}{{8b}{7}}
+\newlabel{fig:exabgp_setting}{{7b}{7}}
 \newlabel{sub@fig:exabgp_setting}{{b}{7}}
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces  (a) Network path by the exabgp container. (b) Required settings in the exabgp container. \relax }}{7}}
-\newlabel{fig:exabgp}{{8}{7}}
-\newlabel{Evaluation}{{5}{7}}
-\newlabel{fig:lb_single_schem}{{9a}{8}}
-\newlabel{sub@fig:lb_single_schem}{{a}{8}}
-\newlabel{fig:bench_example}{{9b}{8}}
-\newlabel{sub@fig:bench_example}{{b}{8}}
-\newlabel{fig:hw_sw_spec}{{9c}{8}}
-\newlabel{sub@fig:hw_sw_spec}{{c}{8}}
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces  (a) Benchmark setup. (b) Benchmark command line and output example. (c) Hardware and software specifications. \relax }}{8}}
-\newlabel{fig:benchmark-schem}{{9}{8}}
-\newlabel{fig:ipvs-iptables-nginx}{{10a}{8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces  (a) Network path by the exabgp container. For the green lines global IP address is used. The red lines use IP addresses of overlay network. The blue line uses the IP address of node network. (b) Required settings in the exabgp container. \relax }}{7}}
+\newlabel{fig:exabgp}{{7}{7}}
+\newlabel{fig:lb_single_schem}{{8a}{7}}
+\newlabel{sub@fig:lb_single_schem}{{a}{7}}
+\newlabel{fig:bench_example}{{8b}{7}}
+\newlabel{sub@fig:bench_example}{{b}{7}}
+\newlabel{fig:hw_sw_spec}{{8c}{7}}
+\newlabel{sub@fig:hw_sw_spec}{{c}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces  (a) Benchmark setup. (b) Benchmark command line and output example. (c) Hardware and software specifications. \relax }}{7}}
+\newlabel{fig:benchmark-schem}{{8}{7}}
+\citation{takahashi2018portable}
+\newlabel{fig:ipvs-iptables-nginx}{{9a}{8}}
 \newlabel{sub@fig:ipvs-iptables-nginx}{{a}{8}}
-\newlabel{fig:gcp_all_ieice}{{10b}{8}}
+\newlabel{fig:gcp_all_ieice}{{9b}{8}}
 \newlabel{sub@fig:gcp_all_ieice}{{b}{8}}
-\newlabel{fig:aws_c4_ieice}{{10c}{8}}
+\newlabel{fig:aws_c4_ieice}{{9c}{8}}
 \newlabel{sub@fig:aws_c4_ieice}{{c}{8}}
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Performance of the proposed load balancer in Cloud environment. (a) GCP: Web: \relax }}{8}}
-\newlabel{fig:ipvs_performance}{{10}{8}}
-\pfn@fnpage{3}{9}
-\newlabel{fig:lb_ecmp_schem}{{11a}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Performance of the proposed load balancer in Cloud environment. (a) GCP: Web: \relax }}{8}}
+\newlabel{fig:ipvs_performance}{{9}{8}}
+\pfn@fnpage{3}{8}
+\newlabel{fig:lb_ecmp_schem}{{10a}{9}}
 \newlabel{sub@fig:lb_ecmp_schem}{{a}{9}}
-\newlabel{fig:ecmp-hw_sw_spec}{{11b}{9}}
+\newlabel{fig:ecmp-hw_sw_spec}{{10b}{9}}
 \newlabel{sub@fig:ecmp-hw_sw_spec}{{b}{9}}
-\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces  (a) Benchmark setup. (b) Hardware and software specifications. \relax }}{9}}
-\newlabel{fig:ecmp-benchmark-schem}{{11}{9}}
-\newlabel{fig:single}{{12a}{10}}
-\newlabel{sub@fig:single}{{a}{10}}
-\newlabel{fig:three}{{12b}{10}}
-\newlabel{sub@fig:three}{{b}{10}}
-\newlabel{fig:double_svc}{{12c}{10}}
-\newlabel{sub@fig:double_svc}{{c}{10}}
-\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces ECMP routing tables.\relax }}{10}}
-\newlabel{fig:exabgp_routing_table}{{12}{10}}
-\newlabel{fig:ecmp_lb_cubic_ieice}{{13a}{10}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces  (a) Benchmark setup. (b) Hardware and software specifications. \relax }}{9}}
+\newlabel{fig:ecmp-benchmark-schem}{{10}{9}}
+\newlabel{fig:single}{{11a}{9}}
+\newlabel{sub@fig:single}{{a}{9}}
+\newlabel{fig:three}{{11b}{9}}
+\newlabel{sub@fig:three}{{b}{9}}
+\newlabel{fig:double_svc}{{11c}{9}}
+\newlabel{sub@fig:double_svc}{{c}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces ECMP routing tables.\relax }}{9}}
+\newlabel{fig:exabgp_routing_table}{{11}{9}}
+\newlabel{fig:ecmp_lb_cubic_ieice}{{12a}{10}}
 \newlabel{sub@fig:ecmp_lb_cubic_ieice}{{a}{10}}
-\newlabel{fig:ecmp_response_ieice}{{13b}{10}}
+\newlabel{fig:ecmp_response_ieice}{{12b}{10}}
 \newlabel{sub@fig:ecmp_response_ieice}{{b}{10}}
-\newlabel{fig:ecmp_delay_histgram_ieice}{{13c}{10}}
+\newlabel{fig:ecmp_delay_histgram_ieice}{{12c}{10}}
 \newlabel{sub@fig:ecmp_delay_histgram_ieice}{{c}{10}}
-\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Scalability of portable load balancer with ECMP redundancy.\relax }}{10}}
-\newlabel{fig:ecmp_scalability}{{13}{10}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Scalability of portable load balancer with ECMP redundancy.\relax }}{10}}
+\newlabel{fig:ecmp_scalability}{{12}{10}}
+\newlabel{Conclusions}{{6}{10}}
 \bibcite{K8s2017}{1}
 \bibcite{K8sFederation2017}{2}
 \bibcite{K8sIngress2017}{3}
@@ -138,7 +136,9 @@
 \bibcite{rfc7911}{29}
 \bibcite{rfc4456}{30}
 \bibcite{thaler2000multipath}{31}
-\newlabel{Conclusions}{{6}{11}}
-\newlabel{appendix:exabgp_config}{{Appendix\ A}{11}}
-\newlabel{appendix:route_reflector_config}{{Appendix\ B}{12}}
-\newlabel{appendix:router_config}{{Appendix\ C}{12}}
+\newlabel{Redundancy with VRRP}{{Appendix\ A}{11}}
+\@writefile{lof}{\contentsline {figure}{\numberline {A$\cdot $\tmspace  +\thinmuskip {.1667em}1}{\ignorespaces  An alternative redundant load balancer architecture using VRRP.\relax }}{11}}
+\newlabel{fig:vrrp}{{A$\cdot $\tmspace  +\thinmuskip {.1667em}1}{11}}
+\newlabel{appendix:exabgp_config}{{Appendix\ B}{12}}
+\newlabel{appendix:route_reflector_config}{{Appendix\ C}{12}}
+\newlabel{appendix:router_config}{{Appendix\ D}{12}}
