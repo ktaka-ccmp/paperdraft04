@@ -1,7 +1,7 @@
 
 \appendix
 
-\section{Redundancy with VRRP}\label{Redundancy with VRRP}
+\section{Redundancy with VRRP}\label{appendix:Redundancy with VRRP}
 
 \begin{figure}[h]
 \begin{center}
@@ -37,23 +37,50 @@ The other drawback compared with the ECMP case is that the redundancy of VRRP is
 This means that a single software load balancer limits the overall performance of the entire container cluster.
 Therefore we believe the ECMP redundancy is better than VRRP in our use cases.
 
-\section{Exabgp configuration on the load balancer container.}
-\label{appendix:exabgp_config}
+\section{Gobgpd and zebra configurations on the router.}
 
-{\bf\normalsize exabgp.conf:}
+{\bf\normalsize gobgp.conf:}
 \begin{verbatim}
-neighbor 10.0.0.109 {
- description "peer1";
- router-id 172.16.20.2;
- local-address 172.16.20.2;
- local-as 65021;
- peer-as 65021;
- hold-time 1800;
-   static {
-     route 10.1.1.0/24 next-hop 10.0.0.106;
-   }
-}
+global:
+  config:
+    as: 65021
+    router-id: 10.0.0.110
+    local-address-list:
+    - 0.0.0.0
+
+  use-multiple-paths:
+    config:
+      enabled: true
+
+neighbors:
+    - config:
+        neighbor-address: 10.0.0.109
+        peer-as: 65021
+      add-paths:
+        config:
+          receive: true
+
+zebra:
+  config:
+    enabled: true
+    url: unix:/run/quagga/zserv.api
+    version: 3
+    redistribute-route-type-list: 
+      - static
+
 \end{verbatim}
+\label{appendix:router_config}
+
+The "use-multiple-paths" should be enabled for the gobgpd to redistribute BGP multipath routes to Zebra.
+
+%
+{\bf\normalsize zebra.conf:}
+\begin{verbatim}
+hostname Router
+log file /var/log/zebra.log
+\end{verbatim}
+
+
 
 \section{Gobgpd configuration on the route reflector.}
 \label{appendix:route_reflector_config}
@@ -98,47 +125,29 @@ neighbors:
 
 \end{verbatim}
 
-\section{Gobgpd and zebra configurations on the router.}
+The "dynamic-neighbors" section and the "peer-groups" section set up dynamic neighbor settings to avoid listing of every possible IP. 
+The "add-paths" setting in the "neighbors" section enables multi path advertisement for a single network prefix.
 
-{\bf\normalsize gobgp.conf:}
+\section{Exabgp configuration on the load balancer container.}
+\label{appendix:exabgp_config}
+
+{\bf\normalsize exabgp.conf:}
 \begin{verbatim}
-global:
-  config:
-    as: 65021
-    router-id: 10.0.0.110
-    local-address-list:
-    - 0.0.0.0
-
-  use-multiple-paths:
-    config:
-      enabled: true
-
-neighbors:
-    - config:
-        neighbor-address: 10.0.0.109
-        peer-as: 65021
-      add-paths:
-        config:
-          receive: true
-
-zebra:
-  config:
-    enabled: true
-    url: unix:/run/quagga/zserv.api
-    version: 3
-    redistribute-route-type-list: 
-      - static
-
-\end{verbatim}
-\label{appendix:router_config}
-%
-{\bf\normalsize zebra.conf:}
-\begin{verbatim}
-hostname Router
-log file /var/log/zebra.log
+neighbor 10.0.0.109 {
+ description "peer1";
+ router-id 172.16.20.2;
+ local-address 172.16.20.2;
+ local-as 65021;
+ peer-as 65021;
+ hold-time 1800;
+   static {
+     route 10.1.1.0/24 next-hop 10.0.0.106;
+   }
+}
 \end{verbatim}
 
-%\caption{Example of zebra config on the router.}
-%\label{fig:zebra_config_router}
-
+The IP address of the load balancer pod(i.e. container), "172.16.20.2", is used for "router-id" and "local-address".
+This address is dynamically assigned when the pod is started.
+The IP address of the node, "10.0.0.106", is used for "next-hop".
+The node address is found out when the pod starts.
 
