@@ -452,14 +452,6 @@ We also evaluated the performance level by changing the number of load balancers
 %
 The following subsections explain the evaluation in detail.
 
-
-%(3) Resource comsumption.
-%We examined the basic performance of the our proposed load balancer container and the basic function of the ECMP redundancy using cluster of physical servers in on-premise data center.
-%As for the performance, we measured throughput of the load balancer container and found that it was at least as good as existing software load balancer using Linux. 
-%The ECMP redundancy is examined by . 
-%We also demonstrate two different service with different number of load balancers can share the group of nodes.
-%The portability of the load balancer is also evaluated using GCP and GCP.
-
 \subsection{Basic functionality and portability}
 
 \begin{figure}[tb]
@@ -795,7 +787,6 @@ when the number of the ipvs pods is changed randomly every 60 seconds for 20 hou
 We also carried out throughput measurement to show that our proposed architecture increases the throughput as we increase the number of the load balancers.
 Fig.~\ref{fig:ecmp_scalability}~(\subref{fig:ecmp_lb_cubic_ieice}) shows the results of the measurements.
 There are four solid lines in the figure, each corresponding the throughput result when there are one through four of the proposed load balancers.
-%As can be seen in the figure, as we increased the number of the pod the thoroughput increased linearly to a certain level after which it saturated.
 The saturated levels, i.e. performance levels depend on the number of the ipvs load balancer pods(lb x 1 being the case with one ipvs pods, and lb x2 being two of them and as such). The performance level increases linearly as we increases the number of the load balancers up to four of the ipvs load balancers, but did not scale further.
 This was because we used up CPU power of the benchmark client since the CPU idle was 0\% when there were more than four load balancers.
 We expect that replacing the benchmark client with more powerful machines, or changing the experimental setup so that multiple benchmark clients can access the load balancers through an ECMP router, will improve the performance level further.
@@ -813,6 +804,9 @@ We can conclude that ECMP routing update in our proposed architecture is quick e
 \FloatBarrier
 
 \subsection{Resource Consumption}
+xxx compares the CPU 
+
+
 
 \section{Conclusions}\label{Conclusions}
 
@@ -820,19 +814,10 @@ In this paper, we proposed a portable load balancer with ECMP redundancy for the
 We implemented an experimental web cluster system with multiple of load balancers and web servers using Kubernetes and OSSs on top of standard Linux boxes to prove the functionality of the proposed architecture.
 We conducted performance measurements and found that the ipvs based load balancer in container functioned properly both in on-premise data center and cloud environments while it showed the comparable performance levels as the existing iptables DNAT based load balancer.
 We also carried out expriments to verify the feasibility of ECMP redundancy in on-premise data center, and revealed that it functions properly with linear scalability up to four load balancers.
-The current limitations of this study are; 
-1) Although our proposed architecture is feasible where users can set up iBGP peer connections to upstream routers, currently major cloud providers do not seem to provide such services.
-2) ...
-These should be addressed in the future work.
-For other future work we plan to improve performance of a single software load balancer on standard Linux box using Xpress Data Plane(XDP) technology. 
 
-
-
-%\section{Future work}\label{Future work}
-
-%BGP peering with the Route Reflector is one way of providing a uniform environment for web service container clusters.
-%While providing a software load balancer that can be controlled through API is another way.
-%For the former, corporation by the cloud provider so that users can use BGP peering with the upstream router is essential.
-%In case such a corporation cannot be made, the latter is also worth investigating.
-
+The current limitations of this study are;
+1) Currently, BGP peering is not supported in GCP and AWS, and thus redundancy is achieved only by route update through cloud API upon the start of a load balancer.
+The authors expect the cloud providers to support it in the future.
+2) Most of the experiments are in 1Gbps network environments.
+For future work, we plan to carry out throughput measurement in 10Gbps network environments and also improve the performance of a single software load balancer on standard Linux box using Xpress Data Plane(XDP) technology.
 
