@@ -325,6 +325,7 @@ In the actual production environment, proprietary hardware with the highest thro
 
 Each load balancer pod consists of an exabgp container and an ipvs container.
 The ipvs container is responsible for distributing the traffic destined to the service IP address toward web(nginx) server pods.
+The IP address for nginx pods and load balancer pods are dynamically assigned upon launch of themselves from 172.16.0.0/16 address range.
 The ipvs container monitors the availability of web server pods and manages the load balancing rule appropriately.
 The exabgp container is responsible for advertising the route toward the IP address that a service uses, to the route reflector.
 The route reflector aggregates the routing information advertised by load balancer pods and advertise them to the upstream router.
