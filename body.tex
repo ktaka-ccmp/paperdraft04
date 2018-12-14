@@ -805,9 +805,19 @@ We can conclude that ECMP routing update in our proposed architecture is quick e
 \FloatBarrier
 
 \subsection{Resource Consumption}
-xxx compares the CPU 
 
+Fig.~\ref{fig:cpu_usage} compares the CPU usage for proposed load balancer(ipvs in a container) and iptables DNAT at the time of the throughput measurement in the on-premise data center.
+Since the CPU usage was higher for the ipvs in a container, the proposed load balancer maybe less efficient compared with the iptables DNAT.
+The authors plan to improve the efficiency of the proposed load balancer by developing a software load balancer using eXpress data path(XDP) technology\cite{hoiland2018express} in the future work and thereby improving the performance levels of the portable load balancer.
 
+The proposed architecture requires additional computational resources compared with the conventional architecture.
+However since single hardware can accommodate 1 Gbps traffic with CPU usage of about 60\%, the authors regard this as a tolerable overhead.
+
+\begin{figure}[h]
+\includegraphics[width=\columnwidth]{Figs/cpu_usage}
+\caption{CPU usage of the ipvs and iptable DNAT.}
+\label{fig:cpu_usage}
+\end{figure}
 
 \section{Conclusions}\label{Conclusions}
 
