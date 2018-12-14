@@ -36,9 +36,15 @@
 %\captionsetup[lstlisting]{format=listing,labelfont=gray,textfont=gray}
 \DeclareCaptionFormat{listing}{\colorbox{white}{\parbox{\dimexpr\linewidth-2\fboxsep\relax}{#1#2#3}}}
 \captionsetup[lstlisting]{format=listing}
+\usepackage{subcaption}
+\captionsetup{compatibility=false}
 
+\usepackage[export]{adjustbox}
 
+\usepackage[utf8]{inputenc}
 \usepackage{fancyvrb}
+\usepackage{pmboxdraw}
+\usepackage{placeins}
 
 \setcounter{page}{1}
 %\breakauthorline{}% breaks lines after the n-th author
@@ -52,7 +58,7 @@
 %\titlenote{}
 \authorlist{%
  \authorentry{Kimitoshi Takahashi}{n}{sokendai,ccmp}
- \authorentry{Kento Aida}{m}{nii,sokendai}\MembershipNumber{1111111}
+ \authorentry{Kento Aida}{m}{nii,sokendai}\MembershipNumber{9201497}
  \authorentry{Tomoya Tanjo}{n}{nii}
  \authorentry{Jingtao Sun}{n}{nii}
  \authorentry{Kazushige Saga}{m}{nii}
@@ -107,8 +113,7 @@ redundancy, ECMP, load balancer, container, BGP
 
 \input{citation}
 
-\input{profile}
-
 \input{appendix}
+\input{profile}
 
 \end{document}
