@@ -3,6 +3,12 @@
 
 \section{Redundancy with VRRP}\label{appendix:Redundancy with VRRP}
 
+The authors have considered another redundant architecture using the VRRP protocol.
+However, it turned out to be less preferable than the proposed ECMP redundancy with following reasons;
+(a)Redundancy is in an active-backup manner.
+(b)The VRRP protocols relied on multicast, which is often not supported in the overlay network environments.
+Here we explain our considerations.
+
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=\columnwidth]{Figs/vrrp.png}
@@ -15,7 +21,7 @@
 \label{fig:vrrp}
 \end{figure}
 
-Fig.~\ref{fig:vrrp} shows an alternative redundancy setup using the VRRP protocol that was first considered by the authors, but did not turn out to be preferable.
+Fig.~\ref{fig:vrrp} shows the redundancy setup using the VRRP protocol.
 In the case of VRRP, the load balancer container needs to run in the node net namespace for the following two reasons.
 1) When fail over occurs, the new master sends gratuitous Address Resolution Packets(ARP) packets to update the ARP cache of the upstream router and Forwarding Data Base(FDB) of layer 2 swicthes during the transition.
 Such gratuitous ARP packets should consist of the virtual IP address shared by the load balancers and the MAC address of the node where the new master load balancer is running.
@@ -73,6 +79,7 @@ zebra:
 
 The "use-multiple-paths" should be enabled for the gobgpd to redistribute BGP multipath routes to Zebra.
 
+\par\bigskip
 \noindent {\bf\normalsize zebra.conf:}
 \begin{verbatim}
 hostname Router
