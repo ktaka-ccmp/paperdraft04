@@ -143,8 +143,10 @@ Here we discuss a general overview of the proposed load balancer architectures.
 \begin{figure}[tb]
 \includegraphics[width=\columnwidth]{Figs/K8sConventional}
 \caption{Conventional architecture of a Kubernetes cluster.}
-Kubernetes is dependent on external cloud load balancers.
+\textcolor{blue}{
+  Kubernetes is dependent on external cloud load balancers.
 This is a problem since bare metal load balancers in on-premise data centers are most likely not supported by Kubernetes.
+}
 \label{fig:K8sConventional}
 \end{figure}
 
@@ -223,11 +225,15 @@ using this framework.
 While containerizing ipvs makes it runnable in any environment, it is essential to discuss how to route the traffic to the ipvs container.
 We propose redundant architecture using ECMP with BGP for load balancer containers usable especially in on-premise data centers.
 We first explain overlay network briefly to understand requirements for the architecture in \ref{Overlay network}, then present the proposed architecture with ECMP redundancy in \ref{Redundancy with ECMP}. 
+\textcolor{blue}{
 (As a complement, we also present an alternative architecture using VRRP for a comparison in \ref{appendix:Redundancy with VRRP}, which we think is not as good as the architecture using ECMP.)
+}
 
+\textcolor{blue}{
 Although major cloud providers do not currently provide BGP peering service for their users, the authors expect they start such service, once this approach is proven to be beneficial.
 Therefore we focus our discussions on verifying that our proposed load balancer architecture is feasible at least in on-premise data centers.
 For the cloud environment without BGP peering service, we can still launch our proposed load balancer without ECMP redundancy by sending out API request to automatically set up a route to the load balancer, from inside the ipvs container.
+}
 
 \paragraph{\bf Overlay network}\label{Overlay network}
 
@@ -266,10 +272,11 @@ We propose the architecture that solves this problem in (2).
 \includegraphics[width=\columnwidth]{Figs/ecmp.png}
 \end{center}
 \caption{The proposed architecture of load balancer redundancy with ECMP.}
+\textcolor{blue}{
   The traffic from the internet is distributed by the upstream router to multiple of lb pods using hash-based ECMP(the solid green line) and then distributed by the lb pods to web pods using Linux kernel's ipvs(the solid red line).
   The route to an IP address for a service(we call this address, service IP) is advertised to the route reflector(the dotted red line) and then advertised to the upstream router(the blue dotted line) using iBGP.
   For the green lines, a service IP address is used. The red lines use the IP addresses of the overlay network. The blue line uses the IP addresses of the node network.
-
+}
 \label{fig:ecmp}
 \end{figure}
 
@@ -314,7 +321,9 @@ Here we discuss the implementation of the experimental system to prove the conce
 \caption{An experimental container cluster with proposed redundant software balancers. }
   The master and nodes are configured as Kubernetes's master and nodes on top of conventional Linux boxes, respectively.
   The route reflector and the upstream router are also conventional Linux boxes.
+\textcolor{blue}{
   For the green lines, a service IP address is used. The red lines use the IP addresses of the overlay network. The blue line uses the IP addresses of the node network.
+}
 \label{fig:poc}
 \end{figure}
 
@@ -359,18 +368,25 @@ The keepalived manages Linux kernel's ipvs rules depending on the ipvs.conf conf
 It can also periodically health check the liveness of a {\em real server}, 
 which is represented as a combination of the IP addresses and port numbers of the target {\em pods}. 
 If the health check to a {\em real server} fails, keepalived will remove that {\em real server} from the ipvs rules immediately.
+\textcolor{blue}{
 The interval of the health check is typically 1 to several seconds and is arbitrarily determined by users.  
+}
 
+\textcolor{blue}{
 Every second, the controller monitors information concerning the running {\em pods} of a service in the Kubernetes cluster by consulting the apiserver running in the master through its API.
+}
 Whenever {\em pods} are created or deleted, the controller notices the change and automatically regenerate an appropriate ipvs.conf 
-and issue SIGHUP to keepalived within a second.
+and issue SIGHUP to keepalived \textcolor{blue}{
+within a second.}
 Then, keepalived will reload the ipvs.conf, and modify the kernel's ipvs rules correctly depending on the result of the health check.
 
+\textcolor{blue}{
 When a pod is terminated, existing connections are reset by the node kernel.
 The SYN packets sent to a pod after termination, but before the ipvs rule update, will be answered with ICMP unreachable by the node.
 In these cases, the client sees connection errors.
 In order to avoid the connection errors to be seen by a human, HTTP client programs are required to re-initiate the connection.
 However, since the load balancer rule update is within a second, these errors can be regarded as the tolerable rare exceptions even without such re-initiations.
+}
 
 The actual controller\cite{ktaka_ccmp_2017_826894} is implemented using the Kubernetes ingress controller\cite{K8sIngress2017} framework. 
 By importing existing Golang package, \enquote{k8s.io/ingress/core/pkg/ingress}, we could simplify the implementation, e.g. 
@@ -421,21 +437,25 @@ For the former case, we also needed to mount the \enquote{/lib/module} of the no
 %  For the green lines, a service IP address is used. The red lines use the IP addresses of the overlay network. The blue line uses the IP addresses of the node network.
     (b) Required settings in the exabgp container.
   }
-  (a): The packets from Internet to a service IP in 10.1.1.0/24 is routed to the load balancer pod by the set of routing rules shown in (b).
-  And then the ipvs forwards them to IP addresses of nginx pods.
+\textcolor{blue}{
+  (a): The packets from Internet to a service IP in 10.1.1.0/24 is routed to the load balancer pod(green arrows) by the set of routing rules shown in (b).
+  And then the ipvs forwards them to IP addresses of nginx pods(red arrows).
   The IP address of any pod is dynamically assigned from 172.16.0.0/16 when the pod is started. 
   (b): (1)The node IP address, 10.0.0.106 is used as next-hop for the IP range 10.1.1.0/24 used by a service in BGP announcement.
   (2)In order to route the packets toward the IP used by the service to a container, a routing rule to the dev docker0 is created in the node net namespace.
   (3)A routing rule to accept the packets as local is also required. 
-  \label{fig:exabgp}
+}
+\label{fig:exabgp}
 \end{figure}
 
 In order to implement the ECMP redundancy, we also containerized exabgp using Docker.
 Fig.\ref{fig:exabgp}~(\subref{fig:exabgp_schem}) shows a schematic diagram of the network path realized by the exabgp container.
 We used exabgp as the BGP advertiser as mentioned earlier.
+\textcolor{blue}{
 The traffic from the Internet is forwarded by ECMP routing table on the router to the node that hosts a load balancer pod, then routed to that pod by the set of routing rules in Fig.\ref{fig:exabgp}~(\subref{fig:exabgp_setting}). 
 And then the ipvs forwards them to IP addresses of nginx pods.
 The IP address of any pod is dynamically assigned from 172.16.0.0/16 when the pod is started. 
+}
 
 Fig.\ref{fig:exabgp}~(\subref{fig:exabgp_setting}) summarises some key settings required for the exabgp container to route the traffic to the ipvs container.
 In BGP announcements the node IP address, 10.0.0.106 is used as the next-hop for the IP range 10.1.1.0/24.
@@ -557,6 +577,7 @@ Transfer/sec:     38.86MB
   \label{fig:benchmark-spec}
 \end{figure}
 
+\textcolor{blue}{
 Throughput measurements were carried out in order to examine the basic functionality of the containerized ipvs load balancer.
 Fig.~\ref{fig:benchmark-schem} shows the schematic diagram of the throughput measurement and the benchmark command line.
 We measured the performance of the load balancers using a benchmark program called wrk\cite{Glozer2016}.
@@ -564,15 +585,20 @@ Multiple nginx {\em pods} are deployed on multiple nodes as web servers in the K
 In each nginx {\em pod}, single nginx web server that returns the IP address of the {\em pod} is running.
 We then set up the ipvs, iptables DNAT, and nginx load balancers on one of the nodes, and performed the throughput measurement.
 The throughput is measured by sending out HTTP requests from the wrk towards a load balancer and by counting the number of responses the benchmark host received as shown in Fig.~\ref{fig:benchmark-schem}~(\subref{fig:lb_single_schem}).
+}
 
+\textcolor{blue}{
 Fig.~\ref{fig:benchmark-schem}~(\subref{fig:bench_example}) shows an example of the command-line for wrk and the corresponding output.
 The command-line in Fig.~\ref{fig:benchmark-schem}~(\subref{fig:bench_example}) will generate 40 wrk program threads
 and allow those threads to send out a total of 800 concurrent HTTP requests over the period of 30 seconds.
 The output example shows information including per-thread statistics, error counts, throughput in [Request/sec] and data rate in [Transfer/sec]
+}
 
+\textcolor{blue}{
 Fig.~\ref{fig:benchmark-spec}~(\subref{fig:machine_spec}) shows hardware and virtual machine specifications for experiments in on-premise data center and cloud environments.
 We used a total of eight servers; six servers for Nodes, one for the load balancer and one for the benchmark client, with all having the same hardware specifications.
 The software versions used for Kubernetes, web server and load balancer {\em pods} used in our experiments are also summarized in Fig.~\ref{fig:benchmark-spec}~(\subref{fig:software_spec}).
+}
 
 \begin{figure}[h]
 
@@ -618,16 +644,19 @@ Multiplying that with 190K [req/sec] and 8 [bit/byte] will result in 966.72 Mbps
 While nginx did not show any benefit as the load balancer, the performance of the ipvs load balancer container showed equivalent performance level as the un-containerized iptables DNAT.
 This means that our proposed ipvs container load balancer is at least as good as the un-containerized iptables' load balancing in the 1 Gbps network.
 
+\textcolor{blue}{
 Fig.~\ref{fig:ipvs_performance}~(\subref{fig:gcp_all_ieice}) and Fig.~\ref{fig:ipvs_performance}~(\subref{fig:aws_c4_ieice}) show the load balancer performance levels that are measured in GCP and AWS, respectively. In the case of GCP, custom instance with 32Gbyte memory and with 8, 16, and 32 CPU are used.
 And in the case of AWS instance type of c4.2xlarge, c4.4xlarge, and c4.8xlarge are used.
 These are aimed to show that our proposed load balancer can be run in cloud environments and also functions properly.
+}
 
+\textcolor{blue}{
 Both results show similar characteristics as the experiment in an on-premise data center in Fig.~\ref{fig:ipvs_performance}~(\subref{fig:ipvs-iptables-nginx}), where throughput increased linearly to a certain saturation level that is determined by either network speed or machine specifications.
 Since in the cases of cloud environments we can easily change the machine specifications, especially CPU counts, we measured throughput with several conditions of them.
 From the first look of the results, since changing CPU counts changed the load balancer's throughput saturation levels, we thought VM's computation power limited the performance levels.
 However, since there are cases in the cloud environment, where changing the VM types or CPU counts also changes the network bandwidth limit, a detailed analysis is further required in the future to clarify which factor limits the throughput in the cases of these cloud environments.
 Still, we can say that the proposed ipvs load balancers can be run in GCP and AWS, and function properly.
-
+}
 
 \subsection{Redundancy and Scalability}
 
@@ -753,11 +782,12 @@ Fig.~\ref{fig:exabgp_routing_table}~(\subref{fig:double_svc}) shows the case whe
 We could accommodate two different services with different service IPs, one with three load balancers and the other with two load balancers on a group of nodes(10.0.0,105,10.0.0,106,10.0.0,107).
 The update of the routing entry was almost instant as we started the load balancers for the second service.
 
+\textcolor{blue}{
 As far as the route withdrawal is concerned, if an exabgp is killed by SIGKILL or SIGTERM the kernel of the node close the BGP connection by sending out a packet with FIN flag to the peer gobgpd on the route reflector, and thus the route is withdrawn immediately.
 The gobgp on the route reflector also periodically check the BGP connection, and if the peer exabgp container is unresponsive for more than the specified duration, “hold-time“ setting in gobgpd, it will also terminate the connection and withdraw the route.
 The packets arriving within the duration will be dropped.
 However, we can set up the “hold-time” short enough so that the retransmitted TCP packets from the client will be forwarded correctly to functioning load balancers.
-
+}
 
 \begin{figure}[t]
 
@@ -792,32 +822,40 @@ when the number of the ipvs pods is changed randomly every 60 seconds for 20 hou
 
 \end{figure}
 
+\textcolor{blue}{
 We also carried out throughput measurement to show that our proposed architecture increases the throughput as we increase the number of the load balancers.
 Fig.~\ref{fig:ecmp_scalability}~(\subref{fig:ecmp_lb_cubic_ieice}) shows the results of the measurements.
 There are four solid lines in the figure, each corresponding the throughput result when there are one through four of the proposed load balancers.
 The saturated levels, i.e. performance levels depend on the number of the ipvs load balancer pods(lb x 1 being the case with one ipvs pods, and lb x2 being two of them and as such). The performance level increases linearly as we increases the number of the load balancers up to four of the ipvs load balancers, but did not scale further.
 This was because we used up CPU power of the benchmark client since the CPU usage was 100\% when there were more than four load balancers.
 We expect that replacing the benchmark client with more powerful machines, or changing the experimental setup so that multiple benchmark clients can access the load balancers through an ECMP router, will improve the performance level further.
+}
 
+\textcolor{blue}{
 Fig.~\ref{fig:ecmp_scalability}~(\subref{fig:ecmp_response_ieice}) shows the throughput measurement results when we periodically changed the number of the load balancers. 
 The red line in the figure shows the number of the ipvs load balancer pods, which we changed randomly every 60 seconds.
 The blue line corresponds to the resulting throughput.
 As we can see from the figure, the blue line nicely follows the shape of the red line.
 This indicates that new load balancers are immediately utilized after they are created, and after removing some load balancers, the traffic to them is immediately directed to the existing load balancers.
+}
 
+\textcolor{blue}{
 Fig.~\ref{fig:ecmp_scalability}~(\subref{fig:ecmp_delay_histgram_ieice}) shows histogram of the ECMP update delay, where we measured the delays until the number of running ipvs pods is reflected in the routing table on the benchmark client, as we change the number of the ipvs pods randomly every 60 seconds for 20 hours.
 As we can see from the figure, most of the delays are within 6 seconds, and the largest delay during the 20 hours experiment was 10 seconds.
 We can conclude that ECMP routing update in our proposed architecture is quick enough.
+}
 
 \FloatBarrier
 
 \subsection{Resource Consumption}
 
+\textcolor{blue}{
 Fig.~\ref{fig:cpu_usage} compares the CPU usage for proposed load balancer(ipvs in a container) and iptables DNAT at the time of the throughput measurement in the on-premise data center.
 Since the CPU usage was higher for the ipvs in a container, the proposed load balancer may be less efficient compared with the iptables DNAT.
 %The proposed architecture requires additional computational resources compared with the conventional architecture.
 However since single hardware can accommodate 1 Gbps traffic with CPU usage of about 60\%, the authors regard this as a tolerable overhead.
 The authors plan to improve the efficiency of the proposed load balancer by developing a software load balancer using eXpress data path(XDP) technology\cite{hoiland2018express} in the future work and thereby improving the performance levels of the portable load balancer.
+}
 
 \begin{figure}[h]
 \includegraphics[width=\columnwidth]{Figs/cpu_usage}
