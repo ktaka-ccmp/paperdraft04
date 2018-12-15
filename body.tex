@@ -184,6 +184,7 @@ To address these problems, we propose a containerized software load balancer wit
 \begin{figure}[tb]
 \includegraphics[width=1.0\columnwidth]{Figs/K8sProposed}
 \caption{Kubernetes cluster with proposed load balancer.}
+The proposed architecture includes software load balancers in container cluster itself thereby removing the dependency on external cloud load balancers.
 \label{fig:K8sProposed}
 \end{figure}
 
@@ -355,22 +356,21 @@ The proposed load balancer needs to dynamically reconfigure the ipvs balancing r
 Fig.~\ref{fig:ipvs-ingress-schem} is a schematic diagram of ipvs container to show the dynamic reconfiguration of the ipvs rules.
 Two daemon programs, controller and keepalived, running in the container are illustrated.
 The keepalived manages Linux kernel's ipvs rules depending on the ipvs.conf configuration file.
-It can also periodically health-check the liveness of a {\em real server}, 
+It can also periodically health check the liveness of a {\em real server}, 
 which is represented as a combination of the IP addresses and port numbers of the target {\em pods}. 
 If the health check to a {\em real server} fails, keepalived will remove that {\em real server} from the ipvs rules immediately.
-The interval of the health-check is typically 1 to several seconds and is arbitrarily determined by users.  
+The interval of the health check is typically 1 to several seconds and is arbitrarily determined by users.  
 
-Every second, the controller monitors information concerning the running {\em pods} of a service 
-in the Kubernetes cluster by consulting the apiserver running in the master.
+Every second, the controller monitors information concerning the running {\em pods} of a service in the Kubernetes cluster by consulting the apiserver running in the master through its API.
 Whenever {\em pods} are created or deleted, the controller notices the change and automatically regenerate an appropriate ipvs.conf 
 and issue SIGHUP to keepalived within a second.
-Then, keepalived will reload the ipvs.conf and modify the kernel's ipvs rules accordingly.
+Then, keepalived will reload the ipvs.conf and modify the kernel's ipvs rules correctly depending on the result of the health check.
 
 When a pod is terminated, existing connections are reset by the node kernel.
 The SYN packets sent to a pod after termination, but before the ipvs rule update, will be answered with ICMP unreachable by the node.
 In these cases, the client sees connection errors.
 In order to avoid the connection errors to be seen by a human, HTTP client programs are required to re-initiate the connection.
-However, since the load balancer rule update is within a second, these errors can be regarded as the rare exceptions even without such re-initiations.
+However, since the load balancer rule update is within a second, these errors can be regarded as the tolerable rare exceptions even without such re-initiations.
 
 The actual controller\cite{ktaka_ccmp_2017_826894} is implemented using the Kubernetes ingress controller\cite{K8sIngress2017} framework. 
 By importing existing Golang package, \enquote{k8s.io/ingress/core/pkg/ingress}, we could simplify the implementation, e.g. 
@@ -421,7 +421,9 @@ For the former case, we also needed to mount the \enquote{/lib/module} of the no
 %  For the green lines, a service IP address is used. The red lines use the IP addresses of the overlay network. The blue line uses the IP addresses of the node network.
     (b) Required settings in the exabgp container.
   }
-  (a): The IP address of any pod is dynamically assigned from 172.16.0.0/16 when the pod is started. 
+  (a): The packets from Internet to a service IP in 10.1.1.0/24 is routed to the load balancer pod by set of routing rules shown in (b).
+  And then the ipvs forwards them to IP addresses of nginx pods.
+  The IP address of any pod is dynamically assigned from 172.16.0.0/16 when the pod is started. 
   (b): (1)The node IP address, 10.0.0.106 is used as next-hop for the IP range 10.1.1.0/24 used by a service in BGP announcement.
   (2)In order to route the packets toward the IP used by the service to a container, a routing rule to the dev docker0 is created in the node net namespace.
   (3)A routing rule to accept the packets as local is also required. 
@@ -431,7 +433,9 @@ For the former case, we also needed to mount the \enquote{/lib/module} of the no
 In order to implement the ECMP redundancy, we also containerized exabgp using Docker.
 Fig.\ref{fig:exabgp}~(\subref{fig:exabgp_schem}) shows a schematic diagram of the network path realized by the exabgp container.
 We used exabgp as the BGP advertiser as mentioned earlier.
-The traffic from the Internet is forwarded by ECMP routing table on the router to the node, then routed to ipvs container.
+The traffic from the Internet is forwarded by ECMP routing table on the router to the node that hosts a load balancer pod, then routed to that pod by set of routing rules in Fig.\ref{fig:exabgp}~(\subref{fig:exabgp_setting}). 
+And then the ipvs forwards them to IP addresses of nginx pods.
+The IP address of any pod is dynamically assigned from 172.16.0.0/16 when the pod is started. 
 
 Fig.\ref{fig:exabgp}~(\subref{fig:exabgp_setting}) summarises some key settings required for the exabgp container to route the traffic to the ipvs container.
 In BGP announcements the node IP address, 10.0.0.106 is used as the next-hop for the IP range 10.1.1.0/24.
@@ -752,7 +756,7 @@ The update of the routing entry was almost instant as we started the load balanc
 As far as the route withdrawal is concerned, if an exabgp is killed by SIGKILL or SIGTERM the kernel of the node close the BGP connection by sending out a packet with FIN flag to the peer gobgpd on the route reflector, and thus the route is withdrawn immediately.
 The gobgp on the route reflector also periodically check the BGP connection, and if the peer exabgp container is unresponsive for more than the specified duration, “hold-time“ setting in gobgpd, it will also terminate the connection and withdraw the route.
 The packets arriving within the duration will be dropped.
-However, we can set up the “hold-time” short enough so that the retransmitted HTTP packets from the client will be forwarded correctly to functioning load balancers.
+However, we can set up the “hold-time” short enough so that the retransmitted TCP packets from the client will be forwarded correctly to functioning load balancers.
 
 
 \begin{figure}[t]
