@@ -822,14 +822,14 @@ when the number of the ipvs pods is changed randomly every 60 seconds for 20 hou
 
 \end{figure}
 
-\textcolor{blue}{
+%\textcolor{blue}{
 We also carried out throughput measurement to show that our proposed architecture increases the throughput as we increase the number of the load balancers.
 Fig.~\ref{fig:ecmp_scalability}~(\subref{fig:ecmp_lb_cubic_ieice}) shows the results of the measurements.
 There are four solid lines in the figure, each corresponding the throughput result when there are one through four of the proposed load balancers.
 The saturated levels, i.e. performance levels depend on the number of the ipvs load balancer pods(lb x 1 being the case with one ipvs pods, and lb x2 being two of them and as such). The performance level increases linearly as we increases the number of the load balancers up to four of the ipvs load balancers, but did not scale further.
 This was because we used up CPU power of the benchmark client since the CPU usage was 100\% when there were more than four load balancers.
 We expect that replacing the benchmark client with more powerful machines, or changing the experimental setup so that multiple benchmark clients can access the load balancers through an ECMP router, will improve the performance level further.
-}
+%}
 
 \textcolor{blue}{
 Fig.~\ref{fig:ecmp_scalability}~(\subref{fig:ecmp_response_ieice}) shows the throughput measurement results when we periodically changed the number of the load balancers. 
