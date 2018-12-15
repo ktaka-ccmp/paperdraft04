@@ -421,8 +421,8 @@ For the former case, we also needed to mount the \enquote{/lib/module} of the no
 %  For the green lines, a service IP address is used. The red lines use the IP addresses of the overlay network. The blue line uses the IP addresses of the node network.
     (b) Required settings in the exabgp container.
   }
-  (a): The packets from Internet to a service IP in 10.1.1.0/24 is routed to the load balancer pod by the set of routing rules shown in (b).
-  And then the ipvs forwards them to IP addresses of nginx pods.
+  (a): The packets from Internet to a service IP in 10.1.1.0/24 is routed to the load balancer pod(green arrows) by the set of routing rules shown in (b).
+  And then the ipvs forwards them to IP addresses of nginx pods(red arrows).
   The IP address of any pod is dynamically assigned from 172.16.0.0/16 when the pod is started. 
   (b): (1)The node IP address, 10.0.0.106 is used as next-hop for the IP range 10.1.1.0/24 used by a service in BGP announcement.
   (2)In order to route the packets toward the IP used by the service to a container, a routing rule to the dev docker0 is created in the node net namespace.
