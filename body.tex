@@ -562,7 +562,7 @@ Fig.~\ref{fig:benchmark-schem} shows the schematic diagram of the throughput mea
 We measured the performance of the load balancers using a benchmark program called wrk\cite{Glozer2016}.
 Multiple nginx {\em pods} are deployed on multiple nodes as web servers in the Kubernetes cluster.
 In each nginx {\em pod}, single nginx web server that returns the IP address of the {\em pod} is running.
-We then set up the ipvs, iptables DNAT, and nginx load balancers on one of the nodes, and performed the throughput measurement.
+We then set up the ipvs, iptables DNAT, and nginx load balancers on one of the nodes, and performed the throughput measurement changing the number of the nginx pods.
 The throughput is measured by sending out HTTP requests from the wrk towards a load balancer and by counting the number of responses the benchmark host received as shown in Fig.~\ref{fig:benchmark-schem}~(\subref{fig:lb_single_schem}).
 
 Fig.~\ref{fig:benchmark-schem}~(\subref{fig:bench_example}) shows an example of the command-line for wrk and the corresponding output.
