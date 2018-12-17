@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #scale=20
-#scale=5
-scale=10
+scale=2
+#scale=10
 
 DIR=./Figs
 shopt -s nullglob
