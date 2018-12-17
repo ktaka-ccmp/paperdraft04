@@ -22,7 +22,7 @@ Here we explain our considerations.
 \end{figure}
 
 Fig.~\ref{fig:vrrp} shows the redundancy setup using the VRRP protocol.
-In the case of VRRP, the load balancer container needs to run in the node net namespace for the following two reasons.
+In the case of VRRP, the load balancer container needs to run in the node net namespace for the following two reasons;
 1) When fail over occurs, the new master sends gratuitous Address Resolution Packets(ARP) packets to update the ARP cache of the upstream router and Forwarding Data Base(FDB) of layer 2 swicthes during the transition.
 Such gratuitous ARP packets should consist of the virtual IP address shared by the load balancers and the MAC address of the node where the new master load balancer is running.
 Programs that send out gratuitous ARP with node MAC address should be in the node net namespace.

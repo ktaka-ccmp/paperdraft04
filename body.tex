@@ -143,7 +143,7 @@ Here we discuss a general overview of the proposed load balancer architectures.
 \begin{figure}[tb]
 \includegraphics[width=\columnwidth]{Figs/K8sConventional}
 \caption{Conventional architecture of a Kubernetes cluster.}
-Kubernetes is dependent on external cloud load balancers.
+  Kubernetes is dependent on external cloud load balancers.
 This is a problem since bare metal load balancers in on-premise data centers are most likely not supported by Kubernetes.
 \label{fig:K8sConventional}
 \end{figure}
@@ -427,7 +427,7 @@ For the former case, we also needed to mount the \enquote{/lib/module} of the no
   (b): (1)The node IP address, 10.0.0.106 is used as next-hop for the IP range 10.1.1.0/24 used by a service in BGP announcement.
   (2)In order to route the packets toward the IP used by the service to a container, a routing rule to the dev docker0 is created in the node net namespace.
   (3)A routing rule to accept the packets as local is also required. 
-  \label{fig:exabgp}
+\label{fig:exabgp}
 \end{figure}
 
 In order to implement the ECMP redundancy, we also containerized exabgp using Docker.
@@ -562,7 +562,7 @@ Fig.~\ref{fig:benchmark-schem} shows the schematic diagram of the throughput mea
 We measured the performance of the load balancers using a benchmark program called wrk\cite{Glozer2016}.
 Multiple nginx {\em pods} are deployed on multiple nodes as web servers in the Kubernetes cluster.
 In each nginx {\em pod}, single nginx web server that returns the IP address of the {\em pod} is running.
-We then set up the ipvs, iptables DNAT, and nginx load balancers on one of the nodes, and performed the throughput measurement.
+We then set up the ipvs, iptables DNAT, and nginx load balancers on one of the nodes, and performed the throughput measurement changing the number of the nginx pods.
 The throughput is measured by sending out HTTP requests from the wrk towards a load balancer and by counting the number of responses the benchmark host received as shown in Fig.~\ref{fig:benchmark-schem}~(\subref{fig:lb_single_schem}).
 
 Fig.~\ref{fig:benchmark-schem}~(\subref{fig:bench_example}) shows an example of the command-line for wrk and the corresponding output.
